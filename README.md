@@ -6,5 +6,5 @@ git submodule update --recursive --remote
 ```
 
 ```shell
-./gradlew build
+./gradlew common:build
 ```
