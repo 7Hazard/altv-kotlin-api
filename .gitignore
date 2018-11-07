@@ -1,0 +1,8 @@
+# gradle
+.gradle
+build
+# intellij idea
+.idea
+*.iml
+# mac_os
+.DS_STORE
