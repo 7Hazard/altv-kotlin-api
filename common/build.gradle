@@ -1,6 +1,12 @@
 apply plugin: 'kotlin-multiplatform'
 
+final def os = org.gradle.internal.os.OperatingSystem.current()
+
 kotlin {
+    final def hostPreset = os.isWindows() ? presets.mingwX64
+            : os.isLinux()   ? presets.linuxX64
+            : os.isMacOsX()  ? presets.macosX64
+            : /* ??? */ null
     sourceSets {
         commonMain {
             dependencies {
@@ -20,12 +26,23 @@ kotlin {
                 //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
             }
         }
-        configure([windowsMain, linuxMain, macMain]) {
+        /*configure([windowsMain, linuxMain, macMain]) {
             dependsOn nativeMain
-        }
+        }*/
     }
     targets {
-        fromPreset(presets.jvm, 'jvm')
+        fromPreset(hostPreset, 'native') {
+            compilations.main {
+                cinterops {
+                    capi {
+                        packageName 'alt.v.c'
+                        extraOpts '-nodefaultlibs'
+                        includeDirs "${System.getProperty("user.dir")}"
+                    }
+                }
+            }
+        }
+        /*fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.mingwX64, 'windows')
         fromPreset(presets.linuxX64, 'linux')
         fromPreset(presets.macosX64, 'mac')
@@ -39,6 +56,6 @@ kotlin {
                     }
                 }
             }
-        }
+        }*/
     }
 }
