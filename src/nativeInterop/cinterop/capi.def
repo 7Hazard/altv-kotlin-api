@@ -1,0 +1,3 @@
+headers = ./c-api/include/altv/capi.h
+headerFilter = ./c-api/include/altv
+package = alt.v.c
