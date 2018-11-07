@@ -1,0 +1,44 @@
+apply plugin: 'kotlin-multiplatform'
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version"
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+            }
+        }
+        nativeMain {
+            dependencies {
+                //implementation 'org.jetbrains.kotlin:kotlin-stdlib-native'
+                //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
+            }
+        }
+        configure([windowsMain, linuxMain, macMain]) {
+            dependsOn nativeMain
+        }
+    }
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.mingwX64, 'windows')
+        fromPreset(presets.linuxX64, 'linux')
+        fromPreset(presets.macosX64, 'mac')
+        configure([windows, linux, mac]) {
+            compilations.main {
+                cinterops {
+                    capi {
+                        packageName 'alt.v.c'
+                        extraOpts '-nodefaultlibs'
+                        includeDirs "${System.getProperty("user.dir")}"
+                    }
+                }
+            }
+        }
+    }
+}
