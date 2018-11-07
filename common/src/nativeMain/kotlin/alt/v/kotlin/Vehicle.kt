@@ -1,12 +1,12 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.CValue
+import kotlinx.cinterop.readValue
 
 class Vehicle internal constructor(private val pointer: kotlinx.cinterop.COpaquePointer) {
     companion object {
-        fun create(model: uint32_t, position: CValue<alt_position_t>, heading: Float): Vehicle? {
-            val pointer = alt_server_create_vehicle(model, position, heading) ?: return null
+        fun create(model: uint32_t, position: Position, heading: Float): Vehicle? {
+            val pointer = alt_server_create_vehicle(model, position.position.readValue(), heading) ?: return null
             return Vehicle(pointer)
         }
     }
