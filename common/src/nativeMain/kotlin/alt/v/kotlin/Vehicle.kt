@@ -3,7 +3,8 @@ package alt.v.kotlin
 import alt.v.c.*
 import kotlinx.cinterop.readValue
 
-class Vehicle internal constructor(private val pointer: kotlinx.cinterop.COpaquePointer) {
+class Vehicle internal constructor(pointer: kotlinx.cinterop.COpaquePointer) :
+    Entity(pointer) {
     companion object {
         fun create(model: uint32_t, position: Position, heading: Float): Vehicle? {
             val pointer = alt_server_create_vehicle(model, position.position.readValue(), heading) ?: return null
