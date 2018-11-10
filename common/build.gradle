@@ -26,14 +26,52 @@ kotlin {
                 //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
             }
         }
+        jniMain {
+            dependencies {
+            }
+        }
+        cMain {
+            dependencies {
+            }
+        }
         /*configure([windowsMain, linuxMain, macMain]) {
             dependsOn nativeMain
         }*/
+        configure([jniMain, nativeMain]) {
+            dependsOn cMain
+        }
     }
     targets {
         fromPreset(hostPreset, 'native') {
             compilations.main {
                 cinterops {
+                    capi {
+                        packageName 'alt.v.c'
+                        extraOpts '-nodefaultlibs'
+                        includeDirs "${System.getProperty("user.dir")}"
+                    }
+                }
+            }
+        }
+        fromPreset(hostPreset, 'c') {
+            compilations.main {
+                cinterops {
+                    capi {
+                        packageName 'alt.v.c'
+                        extraOpts '-nodefaultlibs'
+                        includeDirs "${System.getProperty("user.dir")}"
+                    }
+                }
+            }
+        }
+        fromPreset(hostPreset, 'jni') {
+            compilations.main {
+                cinterops {
+                    jni {
+                        packageName 'alt.v.jni'
+                        extraOpts '-nodefaultlibs'
+                        includeDirs "${System.getProperty("user.dir")}"
+                    }
                     capi {
                         packageName 'alt.v.c'
                         extraOpts '-nodefaultlibs'
