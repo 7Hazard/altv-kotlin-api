@@ -48,7 +48,7 @@ inline class Player constructor(override val pointer: COpaquePointer) :
     val isShooting: Boolean
         get() = alt_player_is_shooting(pointer)
     val vehicle: Vehicle?
-        get() = alt_player_get_vehicle(pointer)?.let { Vehicle(it) }//TODO: reuse objects?
+        get() = alt_player_get_vehicle(pointer)?.let { Vehicle(it) }
 
     fun spawn(position: Position) {
         alt_player_spawn(pointer, position.position)
