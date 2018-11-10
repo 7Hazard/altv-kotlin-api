@@ -2,29 +2,42 @@ package alt.v.kotlin
 
 import alt.v.c.alt_position_t
 import kotlinx.cinterop.CValue
-import kotlinx.cinterop.cValue
 import kotlinx.cinterop.*
 
-inline class Position(internal val position: alt_position_t) {
-    constructor(x: Float, y: Float, z: Float) : this(nativeHeap.alloc<alt_position_t>().apply {
+inline class Position(internal val position: CValue<alt_position_t>) {
+    constructor(x: Float, y: Float, z: Float) : this(cValue<alt_position_t> {
         this.x = x
         this.y = y
         this.z = z
     })
 
     var x: Float
-        set(value) {
-            position.x = value
+        get() = memScoped {
+            return@memScoped position.getPointer(this).pointed.x
         }
-        get() = position.x
+        set(value) {
+            memScoped {
+                position.getPointer(this).pointed.x = value
+            }
+        }
+
     var y: Float
-        set(value) {
-            position.y = value
+        get() = memScoped {
+            return@memScoped position.getPointer(this).pointed.y
         }
-        get() = position.y
+        set(value) {
+            memScoped {
+                position.getPointer(this).pointed.y = value
+            }
+        }
+
     var z: Float
-        set(value) {
-            position.z = value
+        get() = memScoped {
+            return@memScoped position.getPointer(this).pointed.z
         }
-        get() = position.z
+        set(value) {
+            memScoped {
+                position.getPointer(this).pointed.xz = value
+            }
+        }
 }

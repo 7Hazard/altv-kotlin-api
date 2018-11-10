@@ -16,7 +16,7 @@ open class Entity internal constructor(
         }
     }
 
-    class SyncedData(pointer: COpaquePointer): Data(pointer) {
+    class SyncedData(pointer: COpaquePointer) : Data(pointer) {
         override operator fun get(key: String): CValue<alt_mvalue_t>? {
             return alt_entity_get_synced_meta_data(pointer, key)
         }
@@ -31,11 +31,11 @@ open class Entity internal constructor(
             alt_entity_set_dimension(pointer, value)
         }
         get() = alt_entity_get_dimension(pointer)
-    var position: CValue<alt_position_t>
+    var position: Position
         set(value) {
-            alt_entity_set_position(pointer, value)
+            alt_entity_set_position(pointer, value.position)
         }
-        get() = alt_entity_get_position(pointer)
+        get() = Position(alt_entity_get_position(pointer))
     val data = Data(pointer)
     val syncedData = SyncedData(pointer)
 }
