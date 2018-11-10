@@ -1,11 +1,11 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CValue
 import alt.v.kotlin.MetaData.Companion.nil
+import kotlinx.cinterop.CPointer
 
-inline class SyncedMetaData(val pointer: COpaquePointer) : Data {
+inline class SyncedMetaData(val pointer: CPointer<alt_entity_t>) : Data {
 
     override operator fun get(key: String): CValue<alt_mvalue_t>? {
         val value = alt_entity_get_synced_meta_data(pointer, key)

@@ -1,10 +1,10 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.CValue
 
-inline class MetaData(val pointer: COpaquePointer) : Data {
+inline class MetaData(val pointer: CPointer<alt_entity_t>) : Data {
 
     internal companion object {
         internal val nil = alt_mvalue_create_nil()

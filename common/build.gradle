@@ -1,12 +1,14 @@
 apply plugin: 'kotlin-multiplatform'
 
-final def os = org.gradle.internal.os.OperatingSystem.current()
+//final def os = org.gradle.internal.os.OperatingSystem.current()
+
+def hostPreset = MPPTools.defaultHostPreset(project, [kotlin.presets.mingwX64, kotlin.presets.macosX64, kotlin.presets.linuxX64])
 
 kotlin {
-    final def hostPreset = os.isWindows() ? presets.mingwX64
+    /*final def hostPreset = os.isWindows() ? presets.mingwX64
             : os.isLinux()   ? presets.linuxX64
             : os.isMacOsX()  ? presets.macosX64
-            : /* ??? */ null
+            : null*/
     sourceSets {
         commonMain {
             dependencies {
@@ -26,20 +28,20 @@ kotlin {
                 //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
             }
         }
-        jniMain {
+        /*jniMain {
             dependencies {
             }
         }
         cMain {
             dependencies {
             }
-        }
+        }*/
         /*configure([windowsMain, linuxMain, macMain]) {
             dependsOn nativeMain
         }*/
-        configure([jniMain, nativeMain]) {
+        /*configure([jniMain, nativeMain]) {
             dependsOn cMain
-        }
+        }*/
     }
     targets {
         fromPreset(hostPreset, 'native') {
@@ -53,7 +55,7 @@ kotlin {
                 }
             }
         }
-        fromPreset(hostPreset, 'c') {
+        /*fromPreset(hostPreset, 'c') {
             compilations.main {
                 cinterops {
                     capi {
@@ -79,7 +81,7 @@ kotlin {
                     }
                 }
             }
-        }
+        }*/
         /*fromPreset(presets.jvm, 'jvm')
         fromPreset(presets.mingwX64, 'windows')
         fromPreset(presets.linuxX64, 'linux')

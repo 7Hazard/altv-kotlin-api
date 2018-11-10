@@ -118,8 +118,9 @@ object Events {
         playerConnectCallback = callback
         subscribe(EVENT_PLAYER_CONNECT, staticCFunction { event ->
             if (event == null) return@staticCFunction false
-            val playerPointer = alt_player_connect_event_get_target(event)
-            val player = playerPointer?.let { Player(it) }
+            val connectEvent = alt_event_to_player_connect_event(event) ?: return@staticCFunction false
+            val playerPointer = alt_player_connect_event_get_target(connectEvent)
+            val player = playerPointer?.let { alt_player_to_entity(it)?.let { entity -> Player(entity) } }
             return@staticCFunction playerConnectCallback?.invoke(player) ?: false
         })
     }
@@ -128,11 +129,12 @@ object Events {
         playerDamageCallback = callback
         subscribe(EVENT_PLAYER_DAMAGE, staticCFunction { event ->
             if (event == null) return@staticCFunction false
-            val playerPointer = alt_player_damage_event_get_target(event)
-            val attacker = alt_player_damage_event_get_attacker(event)
-            val weapon = alt_player_damage_event_get_weapon(event)
-            val damage = alt_player_damage_event_get_damage(event)
-            val player = playerPointer?.let { Player(it) }
+            val damageEvent = alt_event_to_player_damage_event(event) ?: return@staticCFunction false
+            val playerPointer = alt_player_damage_event_get_target(damageEvent)
+            val attacker = alt_player_damage_event_get_attacker(damageEvent)
+            val weapon = alt_player_damage_event_get_weapon(damageEvent)
+            val damage = alt_player_damage_event_get_damage(damageEvent)
+            val player = playerPointer?.let { alt_player_to_entity(it)?.let { entity -> Player(entity) } }
             return@staticCFunction playerDamageCallback?.invoke(player, attacker, weapon, damage) ?: false
         })
     }
@@ -141,10 +143,11 @@ object Events {
         playerDeathCallback = callback
         subscribe(EVENT_PLAYER_DEAD, staticCFunction { event ->
             if (event == null) return@staticCFunction false
-            val playerPointer = alt_player_dead_event_get_target(event)
-            val player = playerPointer?.let { Player(it) }
-            val killer = alt_player_dead_event_get_killer(event)
-            val weapon = alt_player_dead_event_get_weapon(event)
+            val deathEvent = alt_event_to_player_dead_event(event) ?: return@staticCFunction false
+            val playerPointer = alt_player_dead_event_get_target(deathEvent)
+            val player = playerPointer?.let { alt_player_to_entity(it)?.let { entity -> Player(entity) } }
+            val killer = alt_player_dead_event_get_killer(deathEvent)
+            val weapon = alt_player_dead_event_get_weapon(deathEvent)
             return@staticCFunction playerDeathCallback?.invoke(player, killer, weapon) ?: false
         })
     }
@@ -153,9 +156,10 @@ object Events {
         playerDisconnectCallback = callback
         subscribe(EVENT_PLAYER_DISCONNECT, staticCFunction { event ->
             if (event == null) return@staticCFunction false
-            val playerPointer = alt_player_disconnect_event_get_target(event)
-            val reason = alt_player_disconnect_event_get_reason(event)?.toKString()
-            val player = playerPointer?.let { Player(it) }
+            val disconnectEvent = alt_event_to_player_disconnect_event(event) ?: return@staticCFunction false
+            val playerPointer = alt_player_disconnect_event_get_target(disconnectEvent)
+            val reason = alt_player_disconnect_event_get_reason(disconnectEvent)?.toKString()
+            val player = playerPointer?.let { alt_player_to_entity(it)?.let { entity -> Player(entity) } }
             return@staticCFunction playerDisconnectCallback?.invoke(player, reason) ?: false
         })
     }

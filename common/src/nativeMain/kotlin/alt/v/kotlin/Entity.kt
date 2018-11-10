@@ -1,10 +1,10 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.COpaquePointer
+import kotlinx.cinterop.CPointer
 
 interface Entity {
-    val pointer: COpaquePointer
+    val pointer: CPointer<alt_entity_t>
 
     var dimension: uint16_t
         set(value) {
