@@ -4,7 +4,7 @@ import alt.v.c.*
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CValue
 
-inline class MetaData(val pointer: COpaquePointer) {
+inline class MetaData(val pointer: COpaquePointer) : Data {
 
     internal companion object {
         internal val nil = alt_mvalue_create_nil()

@@ -2,7 +2,7 @@ package alt.v.kotlin
 
 import alt.v.c.*
 
-class Vehicle internal constructor(pointer: kotlinx.cinterop.COpaquePointer) :
+open class Vehicle internal constructor(pointer: kotlinx.cinterop.COpaquePointer) :
     Entity(pointer) {
     companion object {
         fun create(model: uint32_t, position: Position, heading: Float): Vehicle? {

@@ -5,7 +5,7 @@ import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CValue
 import alt.v.kotlin.MetaData.Companion.nil
 
-inline class SyncedMetaData(val pointer: COpaquePointer) {
+inline class SyncedMetaData(val pointer: COpaquePointer) : Data {
     operator fun get(key: String): CValue<alt_mvalue_t>? {
         val value = alt_entity_get_synced_meta_data(pointer, key)
         if (value == nil) {

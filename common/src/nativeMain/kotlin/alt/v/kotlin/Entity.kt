@@ -1,7 +1,6 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.*
 
 open class Entity internal constructor(
     internal val pointer: kotlinx.cinterop.COpaquePointer
@@ -21,6 +20,8 @@ open class Entity internal constructor(
             alt_entity_set_rotation(pointer, value.rotation)
         }
         get() = Rotation(alt_entity_get_rotation(pointer))
-    val data = MetaData(pointer)
-    val syncedData = SyncedMetaData(pointer)
+    val data: Data
+        get() = MetaData(pointer)
+    val syncedData: Data
+        get() = SyncedMetaData(pointer)
 }
