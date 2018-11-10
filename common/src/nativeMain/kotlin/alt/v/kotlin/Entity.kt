@@ -7,8 +7,17 @@ open class Entity internal constructor(
     internal val pointer: kotlinx.cinterop.COpaquePointer
 ) {
     open class Data(val pointer: COpaquePointer) {
+
+        internal companion object {
+            internal val nil = alt_mvalue_create_nil()
+        }
+
         open operator fun get(key: String): CValue<alt_mvalue_t>? {
-            return alt_entity_get_meta_data(pointer, key)
+            val value = alt_entity_get_meta_data(pointer, key)
+            if (value == nil) {
+                return null
+            }
+            return value
         }
 
         open operator fun set(key: String, value: CValue<alt_mvalue_t>) {
@@ -18,7 +27,11 @@ open class Entity internal constructor(
 
     class SyncedData(pointer: COpaquePointer) : Data(pointer) {
         override operator fun get(key: String): CValue<alt_mvalue_t>? {
-            return alt_entity_get_synced_meta_data(pointer, key)
+            val value = alt_entity_get_synced_meta_data(pointer, key)
+            if (value == nil) {
+                return null
+            }
+            return value
         }
 
         override operator fun set(key: String, value: CValue<alt_mvalue_t>) {
