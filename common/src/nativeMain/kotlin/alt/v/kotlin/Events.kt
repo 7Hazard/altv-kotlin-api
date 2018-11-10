@@ -1,15 +1,13 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.*
-import kotlin.reflect.KFunction1
 
 object Events {
     private fun subscribe(event: alt_event_type_t, callback: alt_event_callback_t) {
         alt_server_subscribe_event(event, callback)
     }
 
-    fun subscribe(event: alt_event_type_t, callback: KFunction1<COpaquePointer, Unit>) {
+    /*fun subscribe(event: alt_event_type_t, callback: KFunction1<COpaquePointer, Unit>) {
         subscribe(event, staticCFunction(callback) as alt_event_callback_t)
     }
 
@@ -19,5 +17,5 @@ object Events {
             val player = Player(playerPointer)
             callback(player)
         } as alt_event_callback_t)
-    }
+    }*/
 }

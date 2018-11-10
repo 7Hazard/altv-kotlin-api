@@ -89,6 +89,11 @@ open class Entity internal constructor(
             alt_entity_set_position(pointer, value.position)
         }
         get() = Position(alt_entity_get_position(pointer))
+    var rotation: Rotation
+        set(value) {
+            alt_entity_set_rotation(pointer, value.rotation)
+        }
+        get() = Rotation(alt_entity_get_rotation(pointer))
     val data = Data(pointer)
     val syncedData = SyncedData(pointer)
 }

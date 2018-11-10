@@ -37,7 +37,7 @@ inline class Position(internal val position: CValue<alt_position_t>) {
         }
         set(value) {
             memScoped {
-                position.getPointer(this).pointed.xz = value
+                position.getPointer(this).pointed.z = value
             }
         }
 }
