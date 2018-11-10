@@ -1,10 +1,11 @@
 package alt.v.kotlin
 
 import alt.v.c.*
+import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.toKString
 
-open class Player internal constructor(pointer: kotlinx.cinterop.COpaquePointer) :
-    Entity(pointer) {
+inline class Player constructor(override val pointer: COpaquePointer) :
+    Entity {
     var name: String
         get() = alt_player_get_name(pointer)?.toKString() ?: ""
         set(value) {
@@ -13,7 +14,7 @@ open class Player internal constructor(pointer: kotlinx.cinterop.COpaquePointer)
     var health: uint16_t
         get() = alt_player_get_health(pointer)
         set(value) {
-            alt_player_set_health(pointer, health)
+            alt_player_set_health(pointer, value)
         }
     var armor: uint16_t
         get() = alt_player_get_armor(pointer)

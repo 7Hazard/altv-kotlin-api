@@ -1,10 +1,11 @@
 package alt.v.kotlin
 
 import alt.v.c.*
+import kotlinx.cinterop.COpaquePointer
 
-open class Entity internal constructor(
-    internal val pointer: kotlinx.cinterop.COpaquePointer
-) {
+interface Entity {
+    val pointer: COpaquePointer
+
     var dimension: uint16_t
         set(value) {
             alt_entity_set_dimension(pointer, value)
