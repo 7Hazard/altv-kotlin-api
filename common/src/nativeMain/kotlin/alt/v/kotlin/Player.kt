@@ -1,7 +1,6 @@
 package alt.v.kotlin
 
 import alt.v.c.*
-import kotlinx.cinterop.CValue
 import kotlinx.cinterop.toKString
 
 class Player internal constructor(pointer: kotlinx.cinterop.COpaquePointer) :
