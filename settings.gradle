@@ -1,2 +1,2 @@
-include ':common', ':c-api-interop', ':jni-interop'
+include ':common', ':c-api-interop', ':jni-interop', ':jvm-module'
 //enableFeaturePreview('GRADLE_METADATA')
