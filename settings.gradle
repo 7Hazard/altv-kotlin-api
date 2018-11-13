@@ -1,1 +1,2 @@
-enableFeaturePreview('GRADLE_METADATA')include ':common', ':c-api-interop'
+include ':common', ':c-api-interop', ':jni-interop'
+//enableFeaturePreview('GRADLE_METADATA')
