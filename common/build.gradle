@@ -24,6 +24,7 @@ kotlin {
         }
         nativeMain {
             dependencies {
+                implementation project(":c-api-interop")
                 //implementation 'org.jetbrains.kotlin:kotlin-stdlib-native'
                 //implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
             }
