@@ -3,7 +3,6 @@ package alt.v.module.jvm
 import jni.*
 import kotlinx.cinterop.*
 
-// An empty file is required for the compiler to correctly name the klib file for the common module
 @SymbolName("altvMain")
 external fun altvMain() {
     memScoped {
