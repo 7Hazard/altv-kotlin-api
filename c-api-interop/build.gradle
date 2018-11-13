@@ -44,3 +44,5 @@ kotlin {
         }
     }
 }
+
+//TODO: create gradle task to pull submodule and clean build folder
