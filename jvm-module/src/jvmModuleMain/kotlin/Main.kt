@@ -4,8 +4,8 @@ import jni.*
 import kotlinx.cinterop.*
 
 @SymbolName("altvMain")
-external fun altvMain() {
-    memScoped {
+external fun altvMain(): Boolean {
+    return memScoped {
         val javaVMPointer = allocPointerTo<JavaVMVar>()
         val envPointer = allocPointerTo<JNIEnvVar>()
         val javaVmOptions = allocArray<JavaVMOption>(1)
@@ -19,8 +19,9 @@ external fun altvMain() {
         val rc = JNI_CreateJavaVM(javaVMPointer.ptr, envPointer.ptr as CValuesRef<COpaquePointerVar>/*(void**)&env*/, args.ptr)
         if (rc != JNI_OK) {
             //TODO: error logging cin.get()
-            return@memScoped
+            return@memScoped false
         }
         println(envPointer.reinterpret<JNINativeInterface_>().GetVersion)
+        return@memScoped true
     }
 }

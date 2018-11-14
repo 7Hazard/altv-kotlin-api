@@ -30,8 +30,11 @@ kotlin {
                         case presets.macosX64:
                             includeDirs.headerFilterOnly "$System.env.JAVA_HOME/include", "$System.env.JAVA_HOME/include/darwin"
                             break
+                        case presets.mingwX64:
+                            includeDirs.headerFilterOnly "$System.env.JAVA_HOME/include", "$System.env.JAVA_HOME/include/win32"
+                            break
                         case presets.linuxX64:
-                            includeDirs.headerFilterOnly '/usr/include', '/usr/include/x86_64-linux-gnu'//TODO: linux and windows paths
+                            includeDirs.headerFilterOnly "$System.env.JAVA_HOME/include", "$System.env.JAVA_HOME/include/linux"
                             break
                     }
                     packageName 'jni'
