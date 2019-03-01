@@ -6,3 +6,6 @@ build
 *.iml
 # mac_os
 .DS_STORE
+out/
+
+\.vscode/

@@ -1,3 +1,6 @@
 [submodule "c-api"]
 	path = c-api
 	url = https://gitlab.com/fivenet/fivenet/c-api.git
+[submodule "altv-jvm-module"]
+	path = altv-jvm-module
+	url = https://gitlab.com/7Hazard/altv-jvm-module.git
