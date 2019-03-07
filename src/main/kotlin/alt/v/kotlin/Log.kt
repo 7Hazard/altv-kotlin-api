@@ -1,15 +1,15 @@
 package alt.v.kotlin
 
-import alt.v.jvm.*
+import alt.v.jvm.CAPI as capi
 
 object Log {
     fun info(msg: String)
     {
-        CAPI.func.alt_server_log_info(server, msg)
+        capi.func.alt_server_log_info(capi.server, msg)
     }
     
     fun error(msg: String)
     {
-        CAPI.func.alt_server_log_error(server, msg)
+        capi.func.alt_server_log_error(capi.server, msg)
     }
 }

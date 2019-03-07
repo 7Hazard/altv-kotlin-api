@@ -1,21 +1,38 @@
 package alt.v.kotlin
 
 import alt.v.jvm.CAPI
+import alt.v.kotlin.math.Float3
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
-internal fun GetCString(bufferCapacity: Int, f: (bufferptr: Pointer) -> Unit): String
+internal fun fromCString(bufferCapacity: Int, f: (bufferptr: Pointer) -> Unit): String
 {
     val buffer = ByteBuffer.allocate(bufferCapacity)
     val ptr = Pointer.wrap(CAPI.runtime, buffer)
     f(ptr)
-    for (i in 0..50)
+    for (i in 0..bufferCapacity)
     {
         if(buffer[i].compareTo(0) == 0) return String(buffer.array(), 0, i, StandardCharsets.UTF_8)
     }
     return "[KOTLIN] INVALID STRING"
 }
 
+internal fun fromAltPosition(f: (bufferptr: Pointer) -> Unit): Float3
+{
+    val pos = CAPI.alt_position_t()
+    f(Struct.getMemory(pos))
+    return Float3(pos.x.get(), pos.y.get(), pos.z.get())
+}
 
+internal fun toAltPosition(pos: Float3): Pointer
+{
+    val altpos = CAPI.alt_position_t()
+    altpos.x.set(pos.x)
+    altpos.y.set(pos.y)
+    altpos.z.set(pos.z)
+    return Struct.getMemory(altpos)
+}
+
+fun hash(string: String) = CAPI.func.alt_server_hash(CAPI.server, string)

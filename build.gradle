@@ -1,0 +1,105 @@
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+}
+
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.3.21"
+
+    // Publishing
+    id "com.jfrog.bintray" version "1.7.3"
+    id "maven"
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+
+    maven {
+        url  "https://hazard.bintray.com/Maven"
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile '7hazard:altv-jvm-module:DEV-07-Mar-2019'
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+
+///
+/// Bintray
+///
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+def siteUrl = 'https://gitlab.com/7Hazard/altv-kotlin'
+def gitUrl = 'https://gitlab.com/7Hazard/altv-kotlin.git'
+
+if (System.hasProperty("version")) version = System.getProperty("version")
+else version = "DEV-"+new Date().format('dd-MMM-yyyy', TimeZone.getTimeZone('GMT'))
+group = "7hazard"
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                name 'alt:V Kotlin Server API'
+                url siteUrl
+
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id '7hazard'
+                        name 'Hazard'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('user')
+    key =  System.getProperty('apikey')
+    configurations = ['archives']
+    pkg {
+        repo = 'Maven'
+        name = 'alt.v.kotlin'
+        userOrg = "hazard"
+        licenses = ['Apache-2.0']
+        vcsUrl = gitUrl
+        //publish = true
+    }
+}
