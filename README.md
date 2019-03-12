@@ -1,10 +1,5 @@
 # fivenet-kotlin
 
-## Update c-api
-```shell
-git submodule update --recursive --remote
-```
+Depends on the JVM Module: https://gitlab.com/7Hazard/altv-jvm-module
 
-```shell
-./gradlew common:build
-```
+Bintray: https://bintray.com/beta/#/hazard/Maven/alt.v.kotlin

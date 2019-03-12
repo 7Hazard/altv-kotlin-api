@@ -42,8 +42,10 @@ class Resource {
                     this.javaClass.classLoader
             )
             val classToLoad = Class.forName(main, true, child)
-            val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
-            method.invoke(null, this)
+            //val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
+            //method.invoke(null, this)
+            val method = classToLoad.getDeclaredMethod("main")
+            method.invoke(null)
         } catch (e: Exception) {
             Log.error("[Kotlin-JVM] Exception while loading resource '$name'"
                     + "\n\t Message: " + e.localizedMessage
@@ -58,23 +60,28 @@ class Resource {
         loaded = true
     }
 
-    val onPlayerConnectHandlers = mutableListOf<(PlayerConnectEvent) -> Boolean>()
-    fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) { onPlayerConnectHandlers.add(f) }
+    /*
+    private val onPlayerConnectHandlers = mutableListOf<(PlayerConnectEvent) -> Boolean>()
+    fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) {
+        Log.info("KOTLIN RESOURCE ONPLAYERCONNECT SUBSCRIBED")
+        onPlayerConnectHandlers.add(f)
+    }
 
-    val onPlayerDisconnectHandlers = mutableListOf<(PlayerDisconnectEvent) -> Boolean>()
-    fun onPlayerDisconnect(f: (PlayerDisconnectEvent) -> Boolean) { onPlayerDisconnectHandlers.add(f) }
+    private val onPlayerDisconnectHandlers = mutableListOf<(PlayerDisconnectEvent) -> Boolean>()
+    fun onPlayerDisconnect(f: (PlayerDisconnectEvent) -> Boolean) { onPlayerDisconnectHandlers.add(f) }*/
 
     private val on_event = CAPI.alt_resource_on_event_callback_t(fun(ptr: Pointer): Boolean {
         val event = Event(ptr)
+        Log.info("KOTLIN Resource Event triggered")
 
-        when (event.type) {
+        /*when (event.type) {
             CAPI.alt_event_type_t.PLAYER_CONNECT -> {
                 for (f in onPlayerConnectHandlers) if(!f(PlayerConnectEvent(event))) return false
             }
             CAPI.alt_event_type_t.PLAYER_DISCONNECT -> {
                 for (f in onPlayerDisconnectHandlers) if(!f(PlayerDisconnectEvent(event))) return false
             }
-        }
+        }*/
 
         return true
     })
@@ -82,4 +89,5 @@ class Resource {
     private val onTickCallbacks = mutableListOf<() -> Unit>()
     fun onTick(f: () -> Unit) { onTickCallbacks.add(f) }
     private val on_tick = CAPI.alt_resource_on_tick_callback_t { for (f in onTickCallbacks) f() }
+
 }

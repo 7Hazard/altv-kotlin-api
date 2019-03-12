@@ -15,6 +15,16 @@ plugins {
     id "maven"
 }
 
+// Config
+def siteUrl = 'https://gitlab.com/7Hazard/altv-kotlin'
+def gitUrl = 'https://gitlab.com/7Hazard/altv-kotlin.git'
+
+version = "" //"DEV-"+new Date().format('dd-MMM-yyyy', TimeZone.getTimeZone('GMT'))
+if (System.properties.containsKey("version")) version = System.getProperty("version")
+println "Version is $version"
+group = "7hazard"
+//
+
 repositories {
     jcenter()
     mavenCentral()
@@ -25,15 +35,28 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile '7hazard:altv-jvm-module:DEV-07-Mar-2019'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation '7hazard:altv-jvm-module:DEV-2019-03-12'
 }
 
-jar {
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+task pluginMetadata()  {
+    doLast {
+        new File("$projectDir/build/libs/plugin.cfg").text =
+"""altv-kotlin${version == "" ? "" : "-$version"}.jar
+alt.v.kotlin.MainKt"""
     }
 }
+compileKotlin.finalizedBy pluginMetadata
+
+task fatJar(type: Jar) {
+    baseName = project.name
+    from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+    manifest {
+        attributes 'Main-Class': 'alt.v.kotlin.MainKt'
+    }
+}
+jar.finalizedBy fatJar
 
 
 
@@ -49,13 +72,6 @@ task sourcesJar(type: Jar) {
 artifacts {
     archives sourcesJar
 }
-
-def siteUrl = 'https://gitlab.com/7Hazard/altv-kotlin'
-def gitUrl = 'https://gitlab.com/7Hazard/altv-kotlin.git'
-
-if (System.hasProperty("version")) version = System.getProperty("version")
-else version = "DEV-"+new Date().format('dd-MMM-yyyy', TimeZone.getTimeZone('GMT'))
-group = "7hazard"
 
 install {
     repositories.mavenInstaller {
@@ -92,7 +108,7 @@ install {
 
 bintray {
     user = System.getProperty('user')
-    key =  System.getProperty('apikey')
+    key = System.getProperty('apikey')
     configurations = ['archives']
     pkg {
         repo = 'Maven'
@@ -101,5 +117,19 @@ bintray {
         licenses = ['Apache-2.0']
         vcsUrl = gitUrl
         //publish = true
+    }
+}
+
+bintrayUpload.doFirst {
+    if (!System.properties.containsKey("version")) {
+        throw new InvalidUserDataException("version not set (-Dversion)")
+    }
+
+    if (!System.properties.containsKey("user")) {
+        throw new InvalidUserDataException("user not set (-Duser)")
+    }
+
+    if (!System.properties.containsKey("apikey")) {
+        throw new InvalidUserDataException("apikey not set (-Dapikey)")
     }
 }
