@@ -42,14 +42,14 @@ dependencies {
 task pluginMetadata()  {
     doLast {
         new File("$projectDir/build/libs/plugin.cfg").text =
-"""altv-kotlin${version == "" ? "" : "-$version"}.jar
+"""${project.name}-fat${version == "" ? "" : "-$version"}.jar
 alt.v.kotlin.MainKt"""
     }
 }
 compileKotlin.finalizedBy pluginMetadata
 
 task fatJar(type: Jar) {
-    baseName = project.name
+    baseName = project.name + "-fat"
     from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
     manifest {
