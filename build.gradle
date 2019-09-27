@@ -63,7 +63,7 @@ fatJar.finalizedBy pluginMetadata
 
 
 ///
-/// Bintray
+/// Publishing
 ///
 
 task sourcesJar(type: Jar) {
@@ -71,9 +71,10 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives fatJar
-}
+//artifacts {
+//    archives sourcesJar
+//    archives fatJar
+//}
 
 //install {
 //    repositories.mavenInstaller {
