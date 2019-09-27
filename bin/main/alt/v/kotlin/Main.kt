@@ -9,7 +9,7 @@ import kotlin.math.log
 
 fun main()
 {
-    Log.info("Kotlin-JVM plugin loaded")
+    Log.info("[Kotlin-JVM] Kotlin-JVM plugin loaded")
 
     val script_runtime = CAPIExtra.func.alt_CAPIScriptRuntime_Create(
             create_resource,
@@ -21,26 +21,12 @@ fun main()
             AltStringView("kotlin-jvm").ptr(),
             script_runtime
     )
-    Log.info("Registered 'kotlin-jvm' runtime")
+    Log.info("[Kotlin-JVM] Registered 'kotlin-jvm' runtime")
 }
 
-var create_resource = CAPIExtra.CreateImplFn { runtime, resource ->
-//    Log.info("KOTLIN CREATE RESOURCE")
-//    val kotlinResource = Resource()
-
-    val kotlinResource = Resource(resource)
-    Resource.map[resource] = kotlinResource
-
-    CAPIExtra.func.alt_CAPIResource_Impl_Create(
-            resource,
-            kotlinResource.on_make_client,
-            kotlinResource.on_start,
-            kotlinResource.on_stop,
-            kotlinResource.on_event,
-            kotlinResource.on_tick,
-            kotlinResource.on_create_base_object,
-            kotlinResource.on_remove_base_object
-    )
+var create_resource = CAPIExtra.CreateImplFn { runtime, info ->
+    Log.info("KOTLIN CREATE RESOURCE")
+    null
 }
 
 var remove_resource = CAPIExtra.DestroyImplFn { runtime, resource ->

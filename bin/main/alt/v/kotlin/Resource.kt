@@ -1,7 +1,6 @@
 package alt.v.kotlin
 
 import alt.v.jvm.CAPI
-import alt.v.jvm.CAPIExtra
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 //import alt.v.kotlin.events.Event
@@ -12,53 +11,9 @@ import java.net.URLClassLoader
 import java.net.URL
 
 
-class Resource {
-    companion object {
-        internal val map = HashMap<Pointer?, Resource>()
-    }
-
-    internal val on_make_client = CAPIExtra.MakeClientFn { resource, info, files ->
-
-        true
-    }
-
-    internal val on_start = CAPIExtra.StartFn { resource ->
-
-        true
-    }
-
-    internal val on_stop = CAPIExtra.StopFn { resource ->
-
-        true
-    }
-
-    internal val on_event = CAPIExtra.OnEventFn { resource, event ->
-
-        true
-    }
-
-    internal val on_tick = CAPIExtra.OnResourceTickFn { resource ->
-
-    }
-
-    internal val on_create_base_object = CAPIExtra.OnCreateBaseObjectFn { resource, obj ->
-
-    }
-
-    internal val on_remove_base_object = CAPIExtra.OnRemoveBaseObjectFn { resource, obj ->
-
-    }
-
-    private val pointer: Pointer
-    constructor(pointer: Pointer)
-    {
-        this.pointer = pointer
-    }
-}
-
 //internal val resources = mutableMapOf<String, Resource>()
 
-//class Resource {
+class Resource {
 //    internal var ptr: Pointer? = null
 //    internal var loaded = false
 //
@@ -135,4 +90,4 @@ class Resource {
 //    fun onTick(f: () -> Unit) { onTickCallbacks.add(f) }
 //    private val on_tick = CAPI.alt_resource_on_tick_callback_t { for (f in onTickCallbacks) f() }
 
-//}
+}
