@@ -1,5 +1,6 @@
 package alt.v.kotlin
 
+import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
 import alt.v.jvm.CAPIExtra
 import jnr.ffi.Pointer
@@ -23,8 +24,44 @@ class Resource {
     }
 
     internal val on_start = CAPIExtra.StartFn { resource ->
+        // Load jar
+        val nameview = AltStringView(CAPI.func.alt_IResource_GetName(resource))
+        val name = nameview.str()
+        nameview.free()
+        val mainview = AltStringView(CAPI.func.alt_IResource_GetMain(resource))
+        val main = mainview.str()
+        mainview.free()
 
-        true
+        val jarfile = File("resources/$name/$name.jar")
+        if (!jarfile.isFile) {
+            Log.error("[Kotlin-JVM] Could not open '${jarfile.absolutePath}'")
+            false
+        }
+        else {
+            try {
+                val child = URLClassLoader(
+                        arrayOf<URL>(jarfile.toURI().toURL()),
+                        this.javaClass.classLoader
+                )
+                val classToLoad = Class.forName(main, true, child)
+                //val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
+                //method.invoke(null, this)
+                val method = classToLoad.getDeclaredMethod("main")
+                method.invoke(null)
+
+                true
+            } catch (e: Exception) {
+                Log.error("[Kotlin-JVM] Exception while loading resource '$name'"
+                        + "\n\t Message: " + e.localizedMessage
+                        + "\n\t Cause: " + e.cause
+                        + "\n\t Ext: " + e.toString()
+                        //+"\n\tStack trace: "
+                )
+                e.printStackTrace()
+
+                false
+            }
+        }
     }
 
     internal val on_stop = CAPIExtra.StopFn { resource ->

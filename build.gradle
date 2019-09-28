@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.gitlab.7Hazard:altv-jvm-module:f741526385'
+    implementation 'com.gitlab.7Hazard:altv-jvm-module:2019288295'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 //    implementation '7hazard:altv-jvm-module:DEV-2019-03-12'
 }
@@ -53,7 +53,6 @@ jar.finalizedBy fatJar
 
 task pluginMetadata()  {
     doLast {
-//        println "Version: $version"
         new File("$projectDir/build/libs/plugin.cfg").text =
                 """${project.name}-fat.jar
 alt.v.kotlin.MainKt"""
