@@ -1,10 +1,8 @@
 package alt.v.kotlin
 
 import alt.v.jvm.CAPI
-import jnr.ffi.Pointer
 import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPIExtra
-import kotlin.math.log
 
 
 fun main()
@@ -29,7 +27,6 @@ var create_resource = CAPIExtra.CreateImplFn { runtime, resource ->
 //    val kotlinResource = Resource()
 
     val kotlinResource = Resource(resource)
-    Resource.map[resource] = kotlinResource
 
     CAPIExtra.func.alt_CAPIResource_Impl_Create(
             resource,

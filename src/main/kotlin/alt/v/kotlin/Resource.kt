@@ -3,6 +3,8 @@ package alt.v.kotlin
 import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
 import alt.v.jvm.CAPIExtra
+import alt.v.kotlin.events.Event
+import alt.v.kotlin.events.PlayerConnectEvent
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 //import alt.v.kotlin.events.Event
@@ -15,7 +17,7 @@ import java.net.URL
 
 class Resource {
     companion object {
-        internal val map = HashMap<Pointer?, Resource>()
+        internal val ptrmap = HashMap<Pointer?, Resource>()
     }
 
     internal val on_make_client = CAPIExtra.MakeClientFn { resource, info, files ->
@@ -24,6 +26,8 @@ class Resource {
     }
 
     internal val on_start = CAPIExtra.StartFn { resource ->
+        ptrmap[resource] = this
+
         // Load jar
         val nameview = AltStringView(CAPI.func.alt_IResource_GetName(resource))
         val name = nameview.str()
@@ -44,10 +48,8 @@ class Resource {
                         this.javaClass.classLoader
                 )
                 val classToLoad = Class.forName(main, true, child)
-                //val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
-                //method.invoke(null, this)
-                val method = classToLoad.getDeclaredMethod("main")
-                method.invoke(null)
+                val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
+                method.invoke(null, this)
 
                 true
             } catch (e: Exception) {
@@ -65,11 +67,31 @@ class Resource {
     }
 
     internal val on_stop = CAPIExtra.StopFn { resource ->
-
+        ptrmap.remove(resource)
         true
     }
 
-    internal val on_event = CAPIExtra.OnEventFn { resource, event ->
+    internal val on_event = CAPIExtra.OnEventFn { resourceptr, eventptr ->
+        Log.info("EVENT")
+
+        try {
+            val event = Event(eventptr)
+
+            // CEvent::Type enum field seem to be 16-bits, tested on windows
+//            Log.info("EVENT TYPE ${event.capiType.intValue()}")
+//            Log.info("EVENT TYPE ${event.capiType.get()}")
+
+            when (event.capiType.get() ?: throw NullPointerException())
+            {
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {
+                    for (handler in onPlayerConnectHandlers)
+                        handler(PlayerConnectEvent(eventptr))
+                }
+            }
+        } catch (e: Exception)
+        {
+            Log.exception(e)
+        }
 
         true
     }
@@ -90,6 +112,13 @@ class Resource {
     constructor(pointer: Pointer)
     {
         this.pointer = pointer
+    }
+
+
+    ////// Events //////
+    val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
+    fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) {
+        onPlayerConnectHandlers.add(f)
     }
 }
 

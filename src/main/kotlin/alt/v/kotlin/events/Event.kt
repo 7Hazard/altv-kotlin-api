@@ -2,8 +2,10 @@ package alt.v.kotlin.events
 
 import alt.v.jvm.CAPI
 import alt.v.kotlin.Log
+import alt.v.kotlin.Resource
 import jnr.ffi.Pointer
 import java.lang.Exception
+import java.lang.NullPointerException
 import kotlin.reflect.KClass
 
 //open class Event internal constructor(instance: Pointer) {
@@ -65,3 +67,20 @@ import kotlin.reflect.KClass
 //        }
 //    }
 //}
+
+open class Event internal constructor(pointer: Pointer) {
+    companion object {
+        internal fun useMemory(pointer: Pointer): CAPI.alt_CEvent
+        {
+            val s = CAPI.alt_CEvent()
+            s.useMemory(pointer)
+            return s
+        }
+    }
+
+    internal val pointer = pointer
+    internal val struct = useMemory(pointer)
+
+    internal val capiType get() = struct.type
+//    internal val capiType get() = CAPI.func.alt_CEvent_GetType(pointer)
+}
