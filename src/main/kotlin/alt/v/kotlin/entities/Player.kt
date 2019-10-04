@@ -1,5 +1,6 @@
 package alt.v.kotlin.entities
 
+import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
 //import alt.v.kotlin.fromAltPosition
 //import alt.v.kotlin.fromCString
@@ -8,7 +9,10 @@ import alt.v.kotlin.math.Float3
 import jnr.ffi.Pointer
 
 class Player internal constructor(pointer: Pointer) {
-    private val ptr: Pointer = pointer;
+    private val pointer: Pointer = pointer
+
+    val name: String
+        get() = AltStringView(CAPI.func.alt_IPlayer_GetName(pointer)).use { it.str() }
 
 //    val name: String
 //        get() = fromCString(50) { bufferptr -> CAPI.func.alt_player_get_name(ptr, bufferptr) }

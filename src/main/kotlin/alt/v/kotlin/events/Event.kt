@@ -78,9 +78,9 @@ open class Event internal constructor(pointer: Pointer) {
         }
     }
 
-    internal val pointer = pointer
-    internal val struct = useMemory(pointer)
+    private val pointer = pointer
+    private val struct = useMemory(pointer)
+//    private val struct = StructUtil.useMemory<CAPI.alt_CEvent>(pointer)
 
-    internal val capiType get() = struct.type
-//    internal val capiType get() = CAPI.func.alt_CEvent_GetType(pointer)
+    internal val capiType get() = struct.type.get()
 }

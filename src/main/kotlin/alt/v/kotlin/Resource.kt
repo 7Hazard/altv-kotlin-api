@@ -29,12 +29,12 @@ class Resource {
         ptrmap[resource] = this
 
         // Load jar
-        val nameview = AltStringView(CAPI.func.alt_IResource_GetName(resource))
-        val name = nameview.str()
-        nameview.free()
-        val mainview = AltStringView(CAPI.func.alt_IResource_GetMain(resource))
-        val main = mainview.str()
-        mainview.free()
+        val name = AltStringView(CAPI.func.alt_IResource_GetName(resource)).use {
+            it.str()
+        }
+        val main = AltStringView(CAPI.func.alt_IResource_GetMain(resource)).use {
+            it.str()
+        }
 
         val jarfile = File("resources/$name/$name.jar")
         if (!jarfile.isFile) {
@@ -72,8 +72,6 @@ class Resource {
     }
 
     internal val on_event = CAPIExtra.OnEventFn { resourceptr, eventptr ->
-        Log.info("EVENT")
-
         try {
             val event = Event(eventptr)
 
@@ -81,7 +79,7 @@ class Resource {
 //            Log.info("EVENT TYPE ${event.capiType.intValue()}")
 //            Log.info("EVENT TYPE ${event.capiType.get()}")
 
-            when (event.capiType.get() ?: throw NullPointerException())
+            when (event.capiType)
             {
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {
                     for (handler in onPlayerConnectHandlers)
