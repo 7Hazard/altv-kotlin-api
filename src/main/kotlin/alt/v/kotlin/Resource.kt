@@ -5,6 +5,7 @@ import alt.v.jvm.CAPI
 import alt.v.jvm.CAPIExtra
 import alt.v.kotlin.events.Event
 import alt.v.kotlin.events.PlayerConnectEvent
+import alt.v.kotlin.events.PlayerDisconnectEvent
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 //import alt.v.kotlin.events.Event
@@ -85,6 +86,11 @@ class Resource {
                     for (handler in onPlayerConnectHandlers)
                         handler(PlayerConnectEvent(eventptr))
                 }
+
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {
+                    for (handler in onPlayerDisconnectHandlers)
+                        handler(PlayerDisconnectEvent(eventptr))
+                }
             }
         } catch (e: Exception)
         {
@@ -114,9 +120,16 @@ class Resource {
 
 
     ////// Events //////
-    val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
+    // Connect
+    private val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
     fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) {
         onPlayerConnectHandlers.add(f)
+    }
+
+    // Disconnect
+    private val onPlayerDisconnectHandlers = arrayListOf<(PlayerDisconnectEvent) -> Boolean>()
+    fun onPlayerDisconnect(f: (PlayerDisconnectEvent) -> Boolean) {
+        onPlayerDisconnectHandlers.add(f)
     }
 }
 

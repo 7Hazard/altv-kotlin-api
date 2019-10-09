@@ -1,11 +1,12 @@
 package alt.v.kotlin.events
 
+import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
-//import alt.v.kotlin.entities.Player
-//import alt.v.kotlin.fromCString
+import alt.v.kotlin.entities.Player
+import jnr.ffi.Pointer
 
-//class PlayerDisconnectEvent internal constructor(event: Event) : Event(event) {
-//    val player = Player(CAPI.func.alt_player_connect_event_get_target(ptr))
-//    val reason = fromCString(CAPI.func.alt_player_disconnect_event_get_reason_size(ptr).toInt())
-//    { bufferptr -> CAPI.func.alt_player_disconnect_event_get_reason(ptr, bufferptr) }
-//}
+class PlayerDisconnectEvent internal constructor(pointer: Pointer) : Event(pointer) {
+    val player = Player(CAPI.func.alt_CPlayerDisconnectEvent_GetTarget(pointer))
+    val reason: String
+        get() = AltStringView(CAPI.func.alt_CPlayerDisconnectEvent_GetReason(pointer)).use { it.str() }
+}

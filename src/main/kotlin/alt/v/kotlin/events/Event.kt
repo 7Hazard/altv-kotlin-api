@@ -78,7 +78,7 @@ open class Event internal constructor(pointer: Pointer) {
         }
     }
 
-    private val pointer = pointer
+    internal val pointer = pointer
     private val struct = useMemory(pointer)
 //    private val struct = StructUtil.useMemory<CAPI.alt_CEvent>(pointer)
 
