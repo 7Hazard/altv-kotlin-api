@@ -5,6 +5,7 @@ import alt.v.jvm.CAPI
 import alt.v.jvm.CAPIExtra
 import alt.v.kotlin.events.Event
 import alt.v.kotlin.events.PlayerConnectEvent
+import alt.v.kotlin.events.PlayerDeathEvent
 import alt.v.kotlin.events.PlayerDisconnectEvent
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
@@ -76,10 +77,6 @@ class Resource {
         try {
             val event = Event(eventptr)
 
-            // CEvent::Type enum field seem to be 16-bits, tested on windows
-//            Log.info("EVENT TYPE ${event.capiType.intValue()}")
-//            Log.info("EVENT TYPE ${event.capiType.get()}")
-
             when (event.capiType)
             {
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {
@@ -91,10 +88,15 @@ class Resource {
                     for (handler in onPlayerDisconnectHandlers)
                         handler(PlayerDisconnectEvent(eventptr))
                 }
+
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {
+                    for (handler in onPlayerDeathHandlers)
+                        handler(PlayerDeathEvent(eventptr))
+                }
             }
         } catch (e: Exception)
         {
-            Log.exception(e)
+            Log.exception(e, "[Kotlin-JVM] Exception when invoking event handler")
         }
 
         true
@@ -120,16 +122,22 @@ class Resource {
 
 
     ////// Events //////
-    // Connect
+    // Player Connect
     private val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
     fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) {
         onPlayerConnectHandlers.add(f)
     }
 
-    // Disconnect
+    // Player Disconnect
     private val onPlayerDisconnectHandlers = arrayListOf<(PlayerDisconnectEvent) -> Boolean>()
     fun onPlayerDisconnect(f: (PlayerDisconnectEvent) -> Boolean) {
         onPlayerDisconnectHandlers.add(f)
+    }
+
+    // Player Death
+    private val onPlayerDeathHandlers = arrayListOf<(PlayerDeathEvent) -> Boolean>()
+    fun onPlayerDeath(f: (PlayerDeathEvent) -> Boolean) {
+        onPlayerDeathHandlers.add(f)
     }
 }
 
