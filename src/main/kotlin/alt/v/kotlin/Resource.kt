@@ -1,20 +1,23 @@
 package alt.v.kotlin
 
-import alt.v.jvm.AltStringView
-import alt.v.jvm.CAPI
-import alt.v.jvm.CAPIExtra
+import alt.v.jvm.*
 import alt.v.kotlin.events.Event
 import alt.v.kotlin.events.PlayerConnectEvent
 import alt.v.kotlin.events.PlayerDeathEvent
 import alt.v.kotlin.events.PlayerDisconnectEvent
+import jnr.ffi.Memory
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
+import org.objectweb.asm.tree.TryCatchBlockNode
 //import alt.v.kotlin.events.Event
 //import alt.v.kotlin.events.PlayerConnectEvent
 //import alt.v.kotlin.events.PlayerDisconnectEvent
 import java.io.File
 import java.net.URLClassLoader
 import java.net.URL
+import javax.security.auth.login.LoginContext
+import kotlin.math.log
+import kotlin.math.sin
 
 
 class Resource {
@@ -22,7 +25,19 @@ class Resource {
         internal val ptrmap = HashMap<Pointer?, Resource>()
     }
 
+    var clientType = ""
+
     internal val on_make_client = CAPIExtra.MakeClientFn { resource, info, files ->
+        try {
+            val sinfo = CAPI.alt_IResource_CreationInfo(info)
+            CAPI.func.alt_String_Resize(Struct.getMemory(sinfo.type), clientType.length.toLong())
+            sinfo.type.data.get().putString(0, clientType, clientType.length, StringUtil.UTF8)
+            val curtype = CAPI.func.alt_String_CStr(Struct.getMemory(sinfo.type))
+            Log.info("[Kotlin-JVM] Set client type to '$curtype'")
+        } catch (e: Exception)
+        {
+            Log.exception(e, "[Kotlin-JVM] Exception when making client resource")
+        }
 
         true
     }
