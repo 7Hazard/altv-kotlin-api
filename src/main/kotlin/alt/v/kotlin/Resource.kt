@@ -25,7 +25,8 @@ class Resource {
         internal val ptrmap = HashMap<Pointer?, Resource>()
     }
 
-    var clientType = ""
+    // js as client type by default
+    var clientType = "js"
 
     internal val on_make_client = CAPIExtra.MakeClientFn { resource, info, files ->
         try {
@@ -34,12 +35,13 @@ class Resource {
             sinfo.type.data.get().putString(0, clientType, clientType.length, StringUtil.UTF8)
             val curtype = CAPI.func.alt_String_CStr(Struct.getMemory(sinfo.type))
             Log.info("[Kotlin-JVM] Set client type to '$curtype'")
+
+            true
         } catch (e: Exception)
         {
             Log.exception(e, "[Kotlin-JVM] Exception when making client resource")
+            false
         }
-
-        true
     }
 
     internal val on_start = CAPIExtra.StartFn { resource ->
@@ -109,23 +111,24 @@ class Resource {
                         handler(PlayerDeathEvent(eventptr))
                 }
             }
+
+            true
         } catch (e: Exception)
         {
             Log.exception(e, "[Kotlin-JVM] Exception when invoking event handler")
+            false
         }
-
-        true
     }
 
     internal val on_tick = CAPIExtra.OnResourceTickFn { resource ->
 
     }
 
-    internal val on_create_base_object = CAPIExtra.OnCreateBaseObjectFn { resource, obj ->
+    internal val on_create_base_object = CAPIExtra.OnCreateBaseObjectFn { resource, refobj ->
 
     }
 
-    internal val on_remove_base_object = CAPIExtra.OnRemoveBaseObjectFn { resource, obj ->
+    internal val on_remove_base_object = CAPIExtra.OnRemoveBaseObjectFn { resource, refobj ->
 
     }
 
