@@ -69,17 +69,12 @@ import kotlin.reflect.KClass
 //}
 
 open class Event internal constructor(pointer: Pointer) {
-    companion object {
-        internal fun useMemory(pointer: Pointer): CAPI.alt_CEvent
-        {
-            val s = CAPI.alt_CEvent()
-            s.useMemory(pointer)
-            return s
-        }
-    }
-
     internal val pointer = pointer
-    private val struct = useMemory(pointer)
+    private val struct = run {
+        val s = CAPI.alt_CEvent()
+        s.useMemory(pointer)
+        s
+    }
 //    private val struct = StructUtil.useMemory<CAPI.alt_CEvent>(pointer)
 
     internal val capiType get() = struct.type.get()

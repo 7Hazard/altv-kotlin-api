@@ -6,7 +6,14 @@ import jnr.ffi.Pointer
 import jnr.ffi.Struct
 
 open class BaseObject internal constructor(pointer: Pointer) {
-    private val baseobject: Pointer = pointer
+    private val baseobject: Pointer = run {
+        CAPI.func.alt_IBaseObject_AddRef(pointer)
+        return@run pointer
+    }
+
+    protected fun finalize() {
+        CAPI.func.alt_IBaseObject_RemoveRef(baseobject)
+    }
 
     enum class Type
     {
