@@ -23,5 +23,19 @@ open class Entity internal constructor(pointer: Pointer)
             s.z.set(value.z)
             CAPI.func.alt_IEntity_SetPosition(entity, Struct.getMemory(s))
         }
+
+    var rot: Float3
+        get() {
+            val s = CAPI.alt_Vector_float_3_PointLayout()
+            s.useMemory(CAPI.func.alt_IEntity_GetRotation(entity))
+            return Float3(s.x.get(), s.y.get(), s.z.get())
+        }
+        set(value) {
+            val s = CAPI.alt_Vector_float_3_PointLayout()
+            s.x.set(value.x)
+            s.y.set(value.y)
+            s.z.set(value.z)
+            CAPI.func.alt_IEntity_SetRotation(entity, Struct.getMemory(s))
+        }
 }
 
