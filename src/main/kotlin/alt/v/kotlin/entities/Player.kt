@@ -10,6 +10,13 @@ import jnr.ffi.Struct
 class Player internal constructor(pointer: Pointer)
     : Entity(CAPI.func.alt_IPlayer_to_alt_IEntity(pointer))
 {
+    companion object {
+        fun fromRef(pointer: Pointer): Player
+        {
+            return Player(CAPI.func.alt_RefBase_RefStore_IPlayer_Get(pointer))
+        }
+    }
+
     private val player: Pointer = pointer
 
     val name = AltStringView(CAPI.func.alt_IPlayer_GetName(player)).use { it.str() }

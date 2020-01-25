@@ -8,6 +8,13 @@ import jnr.ffi.Struct
 open class Entity internal constructor(pointer: Pointer)
     : BaseObject(CAPI.func.alt_IEntity_to_alt_IBaseObject(pointer))
 {
+    companion object {
+        fun fromRef(pointer: Pointer): Entity
+        {
+            return Entity(CAPI.func.alt_RefBase_RefStore_IPlayer_Get(pointer))
+        }
+    }
+
     private val entity: Pointer = pointer
 
     var pos: Float3
