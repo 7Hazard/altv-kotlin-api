@@ -121,7 +121,8 @@ class Resource {
     }
 
     internal val on_tick = CAPIExtra.OnResourceTickFn { resource ->
-
+        for (handler in onTickHandlers)
+            handler()
     }
 
     internal val on_create_base_object = CAPIExtra.OnCreateBaseObjectFn { resource, refobj ->
@@ -156,6 +157,12 @@ class Resource {
     private val onPlayerDeathHandlers = arrayListOf<(PlayerDeathEvent) -> Boolean>()
     fun onPlayerDeath(f: (PlayerDeathEvent) -> Boolean) {
         onPlayerDeathHandlers.add(f)
+    }
+
+    // Tick
+    private val onTickHandlers = arrayListOf<() -> Unit>()
+    fun onTick(f: () -> Unit) {
+        onTickHandlers.add(f)
     }
 }
 
