@@ -1,5 +1,6 @@
 package alt.v.kotlin
 
+import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
 import alt.v.kotlin.math.Float3
 import jnr.ffi.Pointer
@@ -28,20 +29,24 @@ import java.nio.charset.StandardCharsets
 //    return "[Kotlin-JVM] INVALID STRING"
 //}
 //
-//internal fun fromAltPosition(f: (bufferptr: Pointer) -> Unit): Float3
-//{
-//    val pos = CAPI.alt_position_t()
-//    f(Struct.getMemory(pos))
-//    return Float3(pos.x.get(), pos.y.get(), pos.z.get())
-//}
-//
-//internal fun toAltPosition(pos: Float3): Pointer
-//{
-//    val altpos = CAPI.alt_position_t()
-//    altpos.x.set(pos.x)
-//    altpos.y.set(pos.y)
-//    altpos.z.set(pos.z)
-//    return Struct.getMemory(altpos)
-//}
-//
-//fun hash(string: String) = CAPI.func.alt_server_hash(CAPI.server, string)
+
+fun hash(string: String): UInt
+{
+    var res = 0u
+    AltStringView(string).use {
+        res = CAPI.func.alt_ICore_Hash(CAPI.core, it.ptr()).toUInt()
+    }
+    return res
+}
+
+internal fun Float3.layout(): CAPI.alt_Vector_float_3_PointLayout
+{
+    val s = CAPI.alt_Vector_float_3_PointLayout()
+    s.x.set(this.x)
+    s.y.set(this.y)
+    s.z.set(this.z)
+
+    return s
+}
+
+internal fun Struct.ptr() = Struct.getMemory(this)
