@@ -33,8 +33,8 @@ repositories {
 }
 
 dependencies {
-//    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
-    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
+    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
+//    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }

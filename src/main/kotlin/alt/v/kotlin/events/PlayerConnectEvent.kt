@@ -9,5 +9,5 @@ class PlayerConnectEvent internal constructor(pointer: Pointer) : Event(pointer)
     val player
         get() = Player.fromRef(CAPI.func.alt_CPlayerConnectEvent_GetTarget(pointer))
     val reason: String
-        get() = AltStringView(CAPI.func.alt_CPlayerConnectEvent_GetReason(pointer)).use { it.str() }
+        get() = AltStringView(CAPI.func.alt_CPlayerConnectEvent_GetReason(pointer)).str()
 }

@@ -9,5 +9,5 @@ class PlayerDisconnectEvent internal constructor(pointer: Pointer) : Event(point
     val player
         get() = Player.fromRef(CAPI.func.alt_CPlayerDisconnectEvent_GetTarget(pointer))
     val reason: String
-        get() = AltStringView(CAPI.func.alt_CPlayerDisconnectEvent_GetReason(pointer)).use { it.str() }
+        get() = AltStringView(CAPI.func.alt_CPlayerDisconnectEvent_GetReason(pointer)).str()
 }

@@ -32,11 +32,7 @@ import java.nio.charset.StandardCharsets
 
 fun hash(string: String): UInt
 {
-    var res = 0u
-    AltStringView(string).use {
-        res = CAPI.func.alt_ICore_Hash(CAPI.core, it.ptr()).toUInt()
-    }
-    return res
+    return CAPI.func.alt_ICore_Hash(CAPI.core, AltStringView(string).ptr()).toUInt()
 }
 
 internal fun Float3.layout(): CAPI.alt_Vector_float_3_PointLayout

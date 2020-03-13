@@ -48,12 +48,8 @@ class Resource {
         ptrmap[resource] = this
 
         // Load jar
-        val name = AltStringView(CAPI.func.alt_IResource_GetName(resource)).use {
-            it.str()
-        }
-        val main = AltStringView(CAPI.func.alt_IResource_GetMain(resource)).use {
-            it.str()
-        }
+        val name = AltStringView(CAPI.func.alt_IResource_GetName(resource)).str()
+        val main = AltStringView(CAPI.func.alt_IResource_GetMain(resource)).str()
 
         val jarfile = File("resources/$name/$name.jar")
         if (!jarfile.isFile) {
