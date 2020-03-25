@@ -49,9 +49,11 @@ class Resource {
 
         // Load jar
         val name = AltStringView(CAPI.func.alt_IResource_GetName(resource)).str()
-        val main = AltStringView(CAPI.func.alt_IResource_GetMain(resource)).str()
+        val main = AltStringView(CAPI.func.alt_IResource_GetMain(resource)).str().split(':')
+        val jarpath = main[0]
+        val mainfunc = main[1]
 
-        val jarfile = File("resources/$name/$name.jar")
+        val jarfile = File("resources/$name/$jarpath")
         if (!jarfile.isFile) {
             Log.error("[Kotlin-JVM] Could not open '${jarfile.absolutePath}'")
             false
@@ -62,7 +64,7 @@ class Resource {
                         arrayOf<URL>(jarfile.toURI().toURL()),
                         this.javaClass.classLoader
                 )
-                val classToLoad = Class.forName(main, true, child)
+                val classToLoad = Class.forName(mainfunc, true, child)
                 val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
                 method.invoke(null, this)
 
