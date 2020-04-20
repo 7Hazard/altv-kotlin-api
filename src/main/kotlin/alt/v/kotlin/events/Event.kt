@@ -14,4 +14,7 @@ open class Event internal constructor(pointer: Pointer) {
     }
 
     internal val capiType get() = struct.type.get()
+
+    val wasCancelled: Boolean
+        get() = CAPI.func.alt_CEvent_WasCancelled(pointer)
 }
