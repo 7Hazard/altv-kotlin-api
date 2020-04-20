@@ -18,7 +18,7 @@ import java.net.URL
 import javax.security.auth.login.LoginContext
 import kotlin.math.log
 import kotlin.math.sin
-
+import kotlinx.coroutines.*
 
 class Resource {
     companion object {
@@ -91,26 +91,39 @@ class Resource {
     internal val on_event = CAPIExtra.OnEventFn { resourceptr, eventptr ->
         try {
             val event = Event(eventptr)
+            var cancelled = false
 
             when (event.capiType)
             {
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {
-                    for (handler in onPlayerConnectHandlers)
-                        handler(PlayerConnectEvent(eventptr))
+                    val ev = PlayerConnectEvent(eventptr)
+                    runBlocking {
+                        for (handler in onPlayerConnectHandlers)
+                            launch { handler(ev) }
+                    }
+                    cancelled = ev.wasCancelled
                 }
 
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {
-                    for (handler in onPlayerDisconnectHandlers)
-                        handler(PlayerDisconnectEvent(eventptr))
+                    val ev = PlayerDisconnectEvent(eventptr)
+                    runBlocking {
+                        for (handler in onPlayerDisconnectHandlers)
+                            handler(ev)
+                    }
+                    cancelled = ev.wasCancelled
                 }
 
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {
-                    for (handler in onPlayerDeathHandlers)
-                        handler(PlayerDeathEvent(eventptr))
+                    val ev = PlayerDeathEvent(eventptr)
+                    runBlocking {
+                        for (handler in onPlayerDeathHandlers)
+                            handler(ev)
+                    }
+                    cancelled = ev.wasCancelled
                 }
             }
 
-            true
+            !cancelled
         } catch (e: Exception)
         {
             Log.exception(e, "[Kotlin-JVM] Exception when invoking event handler")
