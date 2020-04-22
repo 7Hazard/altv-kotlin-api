@@ -23,9 +23,6 @@ fun main()
 }
 
 var create_resource = CAPIExtra.CreateImplFn { runtime, resource ->
-//    Log.info("KOTLIN CREATE RESOURCE")
-//    val kotlinResource = Resource()
-
     val kotlinResource = Resource(resource)
 
     CAPIExtra.func.alt_CAPIResource_Impl_Create(
@@ -47,23 +44,3 @@ var remove_resource = CAPIExtra.DestroyImplFn { runtime, resource ->
 var on_tick = CAPIExtra.OnRuntimeTickFn { runtime ->
 
 }
-
-// resources
-//fun createResource(infoptr: Pointer): Pointer?
-//{
-//    val info = CAPI.alt_resource_creation_info_t()
-//    info.useMemory(infoptr)
-//    Log.info("Loading resource ${info.name.get()}")
-//    val resource = Resource(info)
-//
-//    if(resource.loaded) return resource.ptr
-//    else return null
-//}
-//
-//fun removeResource(resource: Pointer) {
-//    throw Exception("KOTLIN Remove Resource triggered")
-//}
-//
-//fun onTick() {
-//
-//}
