@@ -15,13 +15,14 @@ class Vehicle internal constructor(pointer: Pointer)
     constructor(modelname: String, position: Float3, rotation: Float3)
             : this(hash(modelname), position, rotation)
 
-    constructor(modelhash: UInt, position: Float3, rotation: Float3)
-            : this(
-            CAPI.func.alt_RefBase_RefStore_IPlayer_Get(
-                    CAPI.func.alt_ICore_CreateVehicle(
-                            CAPI.core, modelhash.toInt(), position.layout().ptr(), rotation.layout().ptr()
-                    )
-            )
+    constructor(modelhash: UInt, position: Float3, rotation: Float3) : this(
+            kotlin.run {
+                val s = CAPI.alt_RefBase_RefStore_IVehicle()
+                CAPI.func.alt_ICore_CreateVehicle(
+                        CAPI.core, modelhash.toInt(), position.layout().ptr(), rotation.layout().ptr(), s.ptr()
+                )
+                s.ptr.get()
+            }
     )
 
 

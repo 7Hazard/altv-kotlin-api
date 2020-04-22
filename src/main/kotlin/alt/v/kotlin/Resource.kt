@@ -5,19 +5,14 @@ import alt.v.kotlin.events.Event
 import alt.v.kotlin.events.PlayerConnectEvent
 import alt.v.kotlin.events.PlayerDeathEvent
 import alt.v.kotlin.events.PlayerDisconnectEvent
-import jnr.ffi.Memory
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
-import org.objectweb.asm.tree.TryCatchBlockNode
 //import alt.v.kotlin.events.Event
 //import alt.v.kotlin.events.PlayerConnectEvent
 //import alt.v.kotlin.events.PlayerDisconnectEvent
 import java.io.File
 import java.net.URLClassLoader
 import java.net.URL
-import javax.security.auth.login.LoginContext
-import kotlin.math.log
-import kotlin.math.sin
 import kotlinx.coroutines.*
 
 class Resource {
@@ -48,10 +43,10 @@ class Resource {
         ptrmap[resource] = this
 
         // Load jar
-        val name = AltStringView(CAPI.func.alt_IResource_GetName(resource)).str()
-        val main = AltStringView(CAPI.func.alt_IResource_GetMain(resource)).str().split(':')
+        val name = StringView { ptr -> CAPI.func.alt_IResource_GetName(resource, ptr) }
+        val main = StringView { ptr -> CAPI.func.alt_IResource_GetMain(resource, ptr) }.split(':')
         val jarpath = main[0]
-        val mainfunc = main[1]
+        val mainclass = main[1]
 
         val jarfile = File("resources/$name/$jarpath")
         if (!jarfile.isFile) {
@@ -64,7 +59,7 @@ class Resource {
                         arrayOf<URL>(jarfile.toURI().toURL()),
                         this.javaClass.classLoader
                 )
-                val classToLoad = Class.forName(mainfunc, true, child)
+                val classToLoad = Class.forName(mainclass, true, child)
                 val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
                 method.invoke(null, this)
 

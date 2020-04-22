@@ -1,13 +1,18 @@
 package alt.v.kotlin.events
 
-import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
+import alt.v.kotlin.StringView
 import alt.v.kotlin.entities.Player
+import alt.v.kotlin.ptr
 import jnr.ffi.Pointer
 
 class PlayerConnectEvent internal constructor(pointer: Pointer) : Event(pointer) {
     val player
-        get() = Player.fromRef(CAPI.func.alt_CPlayerConnectEvent_GetTarget(pointer))
-    val reason: String
-        get() = AltStringView(CAPI.func.alt_CPlayerConnectEvent_GetReason(pointer)).str()
+        get() = run {
+            val ref = CAPI.alt_RefBase_RefStore_IPlayer()
+            CAPI.func.alt_CPlayerConnectEvent_GetTarget(pointer, ref.ptr())
+            Player(ref.ptr.get())
+        }
+    val reason
+        get() = StringView { ptr -> CAPI.func.alt_CPlayerConnectEvent_GetReason(pointer, ptr) }
 }

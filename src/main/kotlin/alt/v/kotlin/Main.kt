@@ -19,7 +19,7 @@ fun main()
             AltStringView("kotlin-jvm").ptr(),
             script_runtime
     )
-    Log.info("[Kotlin-JVM] Registered 'kotlin-jvm' runtime")
+    Log.info("[Kotlin-JVM] Registered runtime for 'kotlin-jvm' resource type")
 }
 
 var create_resource = CAPIExtra.CreateImplFn { runtime, resource ->
