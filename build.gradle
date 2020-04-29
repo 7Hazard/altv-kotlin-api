@@ -8,7 +8,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.3.21"
+    id "org.jetbrains.kotlin.jvm" version "1.3.70"
 
     // Publishing
     id "maven"
@@ -33,32 +33,32 @@ repositories {
 }
 
 dependencies {
-//    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
-    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
+    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
+//    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
 }
 
-task fatJar(type: Jar) {
-    baseName = project.name + "-fat"
-    from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+jar {
     manifest {
-        attributes 'Main-Class': 'alt.v.kotlin.MainKt'
+        attributes(
+                'Main-Class': 'alt.v.kotlin.MainKt'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
-jar.finalizedBy fatJar
-
 
 task pluginMetadata()  {
     doLast {
         new File("$projectDir/build/libs/plugin.cfg").text =
-                """${project.name}-fat.jar
+                """${project.name}.jar
 alt.v.kotlin.MainKt"""
     }
 }
-fatJar.finalizedBy pluginMetadata
+jar.finalizedBy pluginMetadata
 
 
 ///
