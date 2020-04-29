@@ -83,7 +83,6 @@ class Resource {
     internal val on_event = CAPIExtra.OnEventFn { resourceptr, eventptr ->
         try {
             val event = Event(eventptr)
-            var cancelled = false
 
             when (event.capiType)
             {
@@ -91,32 +90,35 @@ class Resource {
                     val ev = PlayerConnectEvent(eventptr)
                     runBlocking {
                         for (handler in onPlayerConnectHandlers)
-                            launch { handler(ev) }
+                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onPlayerConnect handler")
+                            }) { handler(ev) }
                     }
-                    cancelled = ev.wasCancelled
                 }
 
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {
                     val ev = PlayerDisconnectEvent(eventptr)
                     runBlocking {
                         for (handler in onPlayerDisconnectHandlers)
-                            handler(ev)
+                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDisconnect handler")
+                            }) { handler(ev) }
                     }
-                    cancelled = ev.wasCancelled
                 }
 
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {
                     val ev = PlayerDeathEvent(eventptr)
                     runBlocking {
                         for (handler in onPlayerDeathHandlers)
-                            handler(ev)
+                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
+                            }) { handler(ev) }
                     }
-                    cancelled = ev.wasCancelled
                 }
             }
 
-            !cancelled
-        } catch (e: Exception)
+            !event.wasCancelled
+        } catch (e: Throwable)
         {
             Log.exception(e, "[Kotlin-JVM] Exception when invoking event handler")
             false
@@ -124,8 +126,12 @@ class Resource {
     }
 
     internal val on_tick = CAPIExtra.OnResourceTickFn { resource ->
-        for (handler in onTickHandlers)
-            handler()
+        runBlocking {
+            for (handler in onTickHandlers)
+                launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                    Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onTick handler")
+                }) { handler() }
+        }
     }
 
     internal val on_create_base_object = CAPIExtra.OnCreateBaseObjectFn { resource, refobj ->

@@ -1,9 +1,7 @@
 package alt.v.kotlin.entities
 
-import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
 import alt.v.kotlin.StringView
-import alt.v.kotlin.math.Float2
 import alt.v.kotlin.math.Float3
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
@@ -11,13 +9,6 @@ import jnr.ffi.Struct
 class Player internal constructor(pointer: Pointer)
     : Entity(CAPI.func.alt_IPlayer_to_alt_IEntity(pointer))
 {
-    companion object {
-        fun fromRef(pointer: Pointer): Player
-        {
-            return Player(CAPI.func.alt_RefBase_RefStore_IPlayer_Get(pointer))
-        }
-    }
-
     private val player: Pointer = pointer
 
     val name = StringView { ptr -> CAPI.func.alt_IPlayer_GetName(player, ptr) }

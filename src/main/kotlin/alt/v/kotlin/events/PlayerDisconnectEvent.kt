@@ -1,6 +1,5 @@
 package alt.v.kotlin.events
 
-import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
 import alt.v.kotlin.StringView
 import alt.v.kotlin.entities.Player

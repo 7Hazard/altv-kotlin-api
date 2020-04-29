@@ -2,7 +2,6 @@ package alt.v.kotlin.events
 
 import alt.v.jvm.CAPI
 import jnr.ffi.Pointer
-import kotlin.Exception
 
 
 open class Event internal constructor(pointer: Pointer) {

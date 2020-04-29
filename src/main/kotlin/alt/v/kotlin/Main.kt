@@ -1,13 +1,16 @@
 package alt.v.kotlin
 
-import alt.v.jvm.CAPI
 import alt.v.jvm.AltStringView
+import alt.v.jvm.CAPI
 import alt.v.jvm.CAPIExtra
-
 
 fun main()
 {
     Log.info("[Kotlin-JVM] Kotlin-JVM plugin loaded")
+
+//    Thread.UncaughtExceptionHandler { t, e ->
+//        Log.exception(e, "[Kotlin-JVM] Unhandled exception thrown")
+//    }
 
     val script_runtime = CAPIExtra.func.alt_CAPIScriptRuntime_Create(
             create_resource,
@@ -44,3 +47,4 @@ var remove_resource = CAPIExtra.DestroyImplFn { runtime, resource ->
 var on_tick = CAPIExtra.OnRuntimeTickFn { runtime ->
 
 }
+
