@@ -1,10 +1,10 @@
-package alt.v.kotlin
+package hazard7.altv.kotlin
 
 import alt.v.jvm.*
-import alt.v.kotlin.events.Event
-import alt.v.kotlin.events.PlayerConnectEvent
-import alt.v.kotlin.events.PlayerDeathEvent
-import alt.v.kotlin.events.PlayerDisconnectEvent
+import hazard7.altv.kotlin.events.Event
+import hazard7.altv.kotlin.events.PlayerConnectEvent
+import hazard7.altv.kotlin.events.PlayerDeathEvent
+import hazard7.altv.kotlin.events.PlayerDisconnectEvent
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 import java.io.File

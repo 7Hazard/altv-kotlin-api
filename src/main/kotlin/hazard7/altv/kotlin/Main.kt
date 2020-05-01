@@ -1,4 +1,4 @@
-package alt.v.kotlin
+package hazard7.altv.kotlin
 
 import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI

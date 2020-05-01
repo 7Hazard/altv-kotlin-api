@@ -16,7 +16,7 @@
 
 @file:Suppress("NOTHING_TO_INLINE")
 
-package alt.v.kotlin.math
+package hazard7.altv.kotlin.math
 
 import kotlin.math.abs
 import kotlin.math.max

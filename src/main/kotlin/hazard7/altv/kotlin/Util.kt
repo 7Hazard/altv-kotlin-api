@@ -1,8 +1,8 @@
-package alt.v.kotlin
+package hazard7.altv.kotlin
 
 import alt.v.jvm.AltStringView
 import alt.v.jvm.CAPI
-import alt.v.kotlin.math.Float3
+import hazard7.altv.kotlin.math.Float3
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 import java.nio.charset.Charset

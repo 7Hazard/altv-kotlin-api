@@ -17,7 +17,7 @@
 
 @file:Suppress("NOTHING_TO_INLINE")
 
-package alt.v.kotlin.math
+package hazard7.altv.kotlin.math
 
 const val PI          = 3.1415926536f
 const val HALF_PI     = PI * 0.5f

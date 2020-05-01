@@ -1,10 +1,10 @@
-package alt.v.kotlin.entities
+package hazard7.altv.kotlin.entities
 
 import alt.v.jvm.CAPI
-import alt.v.kotlin.hash
-import alt.v.kotlin.math.Float3
-import alt.v.kotlin.layout
-import alt.v.kotlin.ptr
+import hazard7.altv.kotlin.hash
+import hazard7.altv.kotlin.math.Float3
+import hazard7.altv.kotlin.layout
+import hazard7.altv.kotlin.ptr
 import jnr.ffi.Pointer
 
 class Vehicle internal constructor(pointer: Pointer)

@@ -1,4 +1,4 @@
-package alt.v.kotlin
+package hazard7.altv.kotlin
 
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -21,7 +21,7 @@ object Log {
         val baos = ByteArrayOutputStream()
         PrintStream(baos, true, "UTF-8").use { ps -> e.printStackTrace(ps) }
         val stackTraceStr = String(baos.toByteArray(), StandardCharsets.UTF_8)
-        Log.error(msg +
+        error(msg +
                 "\n  Message: ${e.localizedMessage}" +
                 "\n  Cause: ${e.cause}" +
                 "\n  Stack Trace: $stackTraceStr")

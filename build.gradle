@@ -33,17 +33,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
-//    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
+//    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
+    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
 }
 
 jar {
     manifest {
         attributes(
-                'Main-Class': 'alt.v.kotlin.MainKt'
+                'Main-Class': 'hazard7.altv.kotlin.MainKt'
         )
     }
     from {
@@ -55,7 +55,7 @@ task pluginMetadata()  {
     doLast {
         new File("$projectDir/build/libs/plugin.cfg").text =
                 """${project.name}.jar
-alt.v.kotlin.MainKt"""
+hazard7.altv.kotlin.MainKt"""
     }
 }
 jar.finalizedBy pluginMetadata

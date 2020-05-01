@@ -1,9 +1,9 @@
-package alt.v.kotlin.events
+package hazard7.altv.kotlin.events
 
 import alt.v.jvm.CAPI
-import alt.v.kotlin.entities.Entity
-import alt.v.kotlin.entities.Player
-import alt.v.kotlin.ptr
+import hazard7.altv.kotlin.entities.Entity
+import hazard7.altv.kotlin.entities.Player
+import hazard7.altv.kotlin.ptr
 import jnr.ffi.Pointer
 
 class PlayerDeathEvent internal constructor(pointer: Pointer) : Event(pointer) {

@@ -1,8 +1,8 @@
-package alt.v.kotlin.entities
+package hazard7.altv.kotlin.entities
 
 import alt.v.jvm.CAPI
-import alt.v.kotlin.StringView
-import alt.v.kotlin.math.Float3
+import hazard7.altv.kotlin.StringView
+import hazard7.altv.kotlin.math.Float3
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 

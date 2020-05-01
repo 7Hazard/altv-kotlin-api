@@ -1,4 +1,4 @@
-package alt.v.kotlin.events
+package hazard7.altv.kotlin.events
 
 import jnr.ffi.Pointer
 
