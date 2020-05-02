@@ -1,6 +1,6 @@
 package hazard7.altv.kotlin
 
-import alt.v.jvm.*
+import hazard7.altv.jvm.*
 import hazard7.altv.kotlin.events.Event
 import hazard7.altv.kotlin.events.PlayerConnectEvent
 import hazard7.altv.kotlin.events.PlayerDeathEvent

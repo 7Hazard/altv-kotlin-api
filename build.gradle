@@ -8,7 +8,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.3.70"
+    id "org.jetbrains.kotlin.jvm" version "1.3.72"
 
     // Publishing
     id "maven"
@@ -33,8 +33,8 @@ repositories {
 }
 
 dependencies {
-//    implementation 'com.gitlab.7Hazard:altv-jvm-module:bd445bcb7b'
-    implementation files('D:/src/altv-jvm-module/build/altv-jvm-module/altv-jvm-module.jar')
+    implementation 'com.gitlab.7Hazard:altv-jvm-module:master-SNAPSHOT'
+    // implementation files('D:/src/altv-jvm-module/build/win32/altv-jvm-module/altv-jvm-module.jar')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
@@ -46,9 +46,11 @@ jar {
                 'Main-Class': 'hazard7.altv.kotlin.MainKt'
         )
     }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+
+    // from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    // from configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    from sourceSets.main.allSource
 }
 
 task pluginMetadata()  {
@@ -65,73 +67,20 @@ jar.finalizedBy pluginMetadata
 /// Publishing
 ///
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+// task sourcesJar(type: Jar) {
+//    classifier = 'sources'
+//    from sourceSets.main.allSource
+// }
+// jar.finalizedBy sourcesJar
+
+// task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+//    javadoc.failOnError(false);
+//    javadoc.source = sourceSets.main.allSource
+//    from javadoc.destinationDir
+// }
 
 //artifacts {
+//    archives javadocJar
 //    archives sourcesJar
-//    archives fatJar
-//}
-
-//install {
-//    repositories.mavenInstaller {
-//        // This generates POM.xml with proper parameters
-//        pom {
-//            project {
-//                packaging 'aar'
-//
-//                name 'alt:V Kotlin Server API'
-//                url siteUrl
-//
-//                // Set your license
-//                licenses {
-//                    license {
-//                        name 'The Apache Software License, Version 2.0'
-//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id '7hazard'
-//                        name 'Hazard'
-//                    }
-//                }
-//                scm {
-//                    connection gitUrl
-//                    developerConnection gitUrl
-//                    url siteUrl
-//                }
-//            }
-//        }
-//    }
-//}
-
-//bintray {
-//    user = System.getProperty('user')
-//    key = System.getProperty('apikey')
-//    configurations = ['archives']
-//    pkg {
-//        repo = 'Maven'
-//        name = 'alt.v.kotlin'
-//        userOrg = "hazard"
-//        licenses = ['Apache-2.0']
-//        vcsUrl = gitUrl
-//        //publish = true
-//    }
-//}
-
-//bintrayUpload.doFirst {
-//    if (!System.properties.containsKey("version")) {
-//        throw new InvalidUserDataException("version not set (-Dversion)")
-//    }
-//
-//    if (!System.properties.containsKey("user")) {
-//        throw new InvalidUserDataException("user not set (-Duser)")
-//    }
-//
-//    if (!System.properties.containsKey("apikey")) {
-//        throw new InvalidUserDataException("apikey not set (-Dapikey)")
-//    }
 //}

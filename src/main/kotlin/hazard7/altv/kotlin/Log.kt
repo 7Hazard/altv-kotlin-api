@@ -8,12 +8,12 @@ import java.nio.charset.StandardCharsets
 object Log {
     fun info(msg: String)
     {
-        alt.v.jvm.Log.info(msg)
+        hazard7.altv.jvm.Log.info(msg)
     }
     
     fun error(msg: String)
     {
-        alt.v.jvm.Log.error(msg)
+        hazard7.altv.jvm.Log.error(msg)
     }
 
     fun exception(e: Throwable, msg: String = "[Kotlin-JVM] Exception thrown")

@@ -1,6 +1,6 @@
 package hazard7.altv.kotlin.events
 
-import alt.v.jvm.CAPI
+import hazard7.altv.jvm.CAPI
 import jnr.ffi.Pointer
 
 

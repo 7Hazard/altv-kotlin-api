@@ -1,6 +1,6 @@
 package hazard7.altv.kotlin.entities
 
-import alt.v.jvm.CAPI
+import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.hash
 import hazard7.altv.kotlin.math.Float3
 import hazard7.altv.kotlin.layout

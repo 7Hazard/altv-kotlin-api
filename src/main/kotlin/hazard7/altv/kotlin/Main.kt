@@ -1,8 +1,8 @@
 package hazard7.altv.kotlin
 
-import alt.v.jvm.AltStringView
-import alt.v.jvm.CAPI
-import alt.v.jvm.CAPIExtra
+import hazard7.altv.jvm.AltStringView
+import hazard7.altv.jvm.CAPI
+import hazard7.altv.jvm.CAPIExtra
 
 fun main()
 {

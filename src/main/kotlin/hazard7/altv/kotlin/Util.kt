@@ -1,7 +1,7 @@
 package hazard7.altv.kotlin
 
-import alt.v.jvm.AltStringView
-import alt.v.jvm.CAPI
+import hazard7.altv.jvm.AltStringView
+import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.math.Float3
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
