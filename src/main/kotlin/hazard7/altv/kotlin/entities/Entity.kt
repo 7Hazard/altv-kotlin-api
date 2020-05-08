@@ -24,4 +24,3 @@ open class Entity internal constructor(pointer: Pointer)
             CAPI.func.alt_IEntity_SetRotation(entity, value.layout().ptr())
         }
 }
-
