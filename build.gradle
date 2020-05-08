@@ -22,10 +22,11 @@ jar {
         )
     }
 
-    // from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    // from configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    from sourceSets.main.allSource
+    // only fatjar for plugin files distrib
+    if (System.env['JITPACK'] == null)
+    {
+        from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 task pluginMetadata()  {
