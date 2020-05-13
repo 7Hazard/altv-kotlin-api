@@ -6,13 +6,9 @@ import jnr.ffi.Pointer
 
 open class Event internal constructor(pointer: Pointer) {
     internal val pointer = pointer
-    private val struct = run {
-        val s = CAPI.alt_CEvent()
-        s.useMemory(pointer)
-        s
-    }
+    internal val struct = CAPI.alt_CEvent(pointer)
 
-    internal val capiType get() = struct.type.get()
+    internal val type get() = struct.type.get()
 
     val wasCancelled: Boolean
         get() = CAPI.func.alt_CEvent_WasCancelled(pointer)
