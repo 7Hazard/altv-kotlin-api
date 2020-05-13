@@ -10,6 +10,11 @@ object Log {
     {
         hazard7.altv.jvm.Log.info(msg)
     }
+
+    fun warning(msg: String)
+    {
+        hazard7.altv.jvm.Log.warning(msg)
+    }
     
     fun error(msg: String)
     {
