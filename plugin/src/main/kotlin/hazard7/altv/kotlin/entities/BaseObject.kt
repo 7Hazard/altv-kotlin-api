@@ -1,9 +1,9 @@
 package hazard7.altv.kotlin.entities
 
 import hazard7.altv.jvm.CAPI
-import hazard7.altv.kotlin.math.Float3
+import hazard7.altv.kotlin.logInfo
 import jnr.ffi.Pointer
-import jnr.ffi.Struct
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 open class BaseObject internal constructor(pointer: Pointer) {
     private val baseobject: Pointer = run {
@@ -26,6 +26,6 @@ open class BaseObject internal constructor(pointer: Pointer) {
         ColShape
     }
 
-    val type = CAPI.func.alt_IBaseObject_GetType(baseobject).toString()
+    val type by lazy { CAPI.func.alt_IBaseObject_GetType(baseobject).toString() }
 }
 

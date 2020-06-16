@@ -6,7 +6,7 @@ import hazard7.altv.jvm.CAPIExtra
 
 fun main()
 {
-    Log.info("[Kotlin-JVM] Kotlin-JVM plugin loaded")
+    logInfo("[Kotlin-JVM] Kotlin-JVM plugin loaded")
 
 //    Thread.UncaughtExceptionHandler { t, e ->
 //        Log.exception(e, "[Kotlin-JVM] Unhandled exception thrown")
@@ -22,7 +22,7 @@ fun main()
             AltStringView("kotlin-jvm").ptr(),
             script_runtime
     )
-    Log.info("[Kotlin-JVM] Registered runtime for 'kotlin-jvm' resource type")
+    logInfo("[Kotlin-JVM] Registered runtime for 'kotlin-jvm' resource type")
 }
 
 var create_resource = CAPIExtra.CreateImplFn { runtime, resource ->
@@ -41,7 +41,7 @@ var create_resource = CAPIExtra.CreateImplFn { runtime, resource ->
 }
 
 var remove_resource = CAPIExtra.DestroyImplFn { runtime, resource ->
-    Log.info("[Kotlin-JVM] KOTLIN REMOVE RESOURCE")
+    logInfo("[Kotlin-JVM] KOTLIN REMOVE RESOURCE")
 }
 
 var on_tick = CAPIExtra.OnRuntimeTickFn { runtime ->

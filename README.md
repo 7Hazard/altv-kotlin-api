@@ -1,5 +1,5 @@
-# fivenet-kotlin
+# Kotlin API for alt:V
 
-Depends on the JVM Module: https://gitlab.com/7Hazard/altv-jvm-module
+Powered by [alt:V JVM Module](https://github.com/7Hazard/altv-jvm-module)
 
-Jitpack: https://jitpack.io/#com.gitlab.7Hazard/altv-kotlin
+Jitpack: https://jitpack.io/#7Hazard/altv-kotlin-api

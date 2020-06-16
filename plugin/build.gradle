@@ -1,0 +1,27 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+//    implementation "org.reflections:reflections:0.9.11"
+
+    implementation 'com.github.7Hazard:altv-jvm-module:da8f064'
+}
+
+archivesBaseName = 'altv-kotlin'
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'hazard7.altv.kotlin.MainKt'
+        )
+    }
+
+    // only fatjar for plugin files distrib
+    if (System.env['JITPACK'] == null)
+    {
+        from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

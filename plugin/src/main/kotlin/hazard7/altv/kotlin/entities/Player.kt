@@ -2,7 +2,10 @@ package hazard7.altv.kotlin.entities
 
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.StringView
+import hazard7.altv.kotlin.hash
+import hazard7.altv.kotlin.layout
 import hazard7.altv.kotlin.math.Float3
+import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 
@@ -11,26 +14,23 @@ class Player internal constructor(pointer: Pointer)
 {
     private val player: Pointer = pointer
 
-    val name = StringView { ptr -> CAPI.func.alt_IPlayer_GetName(player, ptr) }
+    val name by lazy { StringView { ptr -> CAPI.func.alt_IPlayer_GetName(player, ptr) } }
 
-    var health
-        get() = CAPI.func.alt_IPlayer_GetHealth(player)
-        set(value) = CAPI.func.alt_IPlayer_SetHealth(player, value)
+    var health: Short
+        get() = (CAPI.func.alt_IPlayer_GetHealth(player) - 100).toShort()
+        set(value) = CAPI.func.alt_IPlayer_SetHealth(player, (value+100).toShort())
 
     var model
         get() = CAPI.func.alt_IPlayer_GetModel(player)
         set(value) = CAPI.func.alt_IPlayer_SetModel(player, value)
 
+    fun setModel(name: String) { CAPI.func.alt_IPlayer_SetModel(player, hash(name)) }
+
     fun spawn(pos: Float3, delay: Int = 0)
     {
-        val s = CAPI.alt_Vector_float_3_PointLayout()
-        s.x.set(pos.x)
-        s.y.set(pos.y)
-        s.z.set(pos.z)
-
         CAPI.func.alt_IPlayer_Spawn(
                 player,
-                Struct.getMemory(s),
+                pos.layout().pointer,
                 delay
         )
     }

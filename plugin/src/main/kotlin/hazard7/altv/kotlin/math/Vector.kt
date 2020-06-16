@@ -590,6 +590,8 @@ data class Float4(
         w = block(w)
         return this
     }
+
+    override fun toString() = "{ $x, $y, $z }"
 }
 
 inline operator fun Float.plus(v: Float2) = Float2(this + v.x, this + v.y)

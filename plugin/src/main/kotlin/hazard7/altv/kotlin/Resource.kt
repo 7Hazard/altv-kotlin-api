@@ -3,10 +3,7 @@ package hazard7.altv.kotlin
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.jvm.CAPIExtra
 import hazard7.altv.jvm.StringUtil
-import hazard7.altv.kotlin.events.Event
-import hazard7.altv.kotlin.events.PlayerConnectEvent
-import hazard7.altv.kotlin.events.PlayerDeathEvent
-import hazard7.altv.kotlin.events.PlayerDisconnectEvent
+import hazard7.altv.kotlin.events.*
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -20,7 +17,7 @@ import java.util.jar.JarFile
 
 class Resource internal constructor(resourceptr: Pointer) {
     companion object {
-        internal val ptrmap = HashMap<Pointer?, Resource>()
+        internal val ptrmap = HashMap<Pointer, Resource>()
     }
 
 //    private val resourceptr = pointer // not needed
@@ -34,12 +31,12 @@ class Resource internal constructor(resourceptr: Pointer) {
             CAPI.func.alt_String_Resize(Struct.getMemory(sinfo.type), clientType.length.toLong())
             sinfo.type.data.get().putString(0, clientType, clientType.length, StringUtil.UTF8)
             val curtype = CAPI.func.alt_String_CStr(Struct.getMemory(sinfo.type))
-            Log.info("[Kotlin-JVM] Set client type to '$curtype' for '$name'")
+            logInfo("[Kotlin-JVM] Set client type to '$curtype' for '$name'")
 
             true
         } catch (e: Throwable)
         {
-            Log.exception(e, "[Kotlin-JVM] Exception when making client resource")
+            logException(e, "[Kotlin-JVM] Exception when making client resource")
             false
         }
     }
@@ -51,7 +48,7 @@ class Resource internal constructor(resourceptr: Pointer) {
         val jarpath = StringView { ptr -> CAPI.func.alt_IResource_GetMain(resource, ptr) }
         val jarfile = File("resources/$name/$jarpath")
         if (!jarfile.isFile) {
-            Log.error("[Kotlin-JVM] Could not open '${jarfile.absolutePath}'")
+            logError("[Kotlin-JVM] Could not open '${jarfile.absolutePath}'")
             return@StartFn false
         }
 
@@ -59,21 +56,28 @@ class Resource internal constructor(resourceptr: Pointer) {
             val jar = JarFile(jarfile)
             val mainclass = jar.manifest.mainAttributes.getValue("Main-Class")
             if(mainclass == null) {
-                Log.error("[Kotlin-JVM] Could not get Main-Class from manifest")
+                logError("[Kotlin-JVM] Could not get Main-Class from manifest")
                 return@StartFn false
             }
 
-            val child = URLClassLoader(
+            val classLoader = URLClassLoader(
                 arrayOf<URL>(jarfile.toURI().toURL()),
                 this.javaClass.classLoader
             )
-            val classToLoad = Class.forName(mainclass, true, child)
+            val classToLoad = Class.forName(mainclass, true, classLoader)
             val method = classToLoad.getDeclaredMethod("main", Resource::class.java)
             method.invoke(null, this)
 
+//            loadEventHandlers(classToLoad.packageName, classLoader) { method, t: OnServerEvent ->
+//                logInfo("LOADING ${t.name}")
+//                if (!onServerEventHandlers.containsKey(t.name))
+//                    onServerEventHandlers[t.name] = hashSetOf(method)
+//                else onServerEventHandlers[t.name]?.add(method)
+//            }
+
             true
         } catch (e: Throwable) {
-            Log.error("[Kotlin-JVM] Exception while loading resource '$name'"
+            logError("[Kotlin-JVM] Exception while loading resource '$name'"
                     + "\n\t Message: " + e.localizedMessage
                     + "\n\t Cause: " + e.cause
                     + "\n\t Ext: " + e.toString()
@@ -99,42 +103,73 @@ class Resource internal constructor(resourceptr: Pointer) {
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {
                     val ev = PlayerConnectEvent(eventptr)
                     runBlocking {
-                        for (handler in onPlayerConnectHandlers)
+                        for (handler in onPlayerConnectHandlers) {
                             launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onPlayerConnect handler")
+                                logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerConnect handler")
                             }) { handler(ev) }
+                        }
                     }
                 }
 
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {
                     val ev = PlayerDisconnectEvent(eventptr)
                     runBlocking {
-                        for (handler in onPlayerDisconnectHandlers)
+                        for (handler in onPlayerDisconnectHandlers){
                             launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDisconnect handler")
+                                logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDisconnect handler")
                             }) { handler(ev) }
+                        }
                     }
                 }
 
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {
                     val ev = PlayerDeathEvent(eventptr)
                     runBlocking {
-                        for (handler in onPlayerDeathHandlers)
+                        for (handler in onPlayerDeathHandlers){
                             launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
+                                logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                             }) { handler(ev) }
+                        }
                     }
                 }
 
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_SERVER_SCRIPT_EVENT -> {
+                    val ev = ServerEvent(eventptr)
+                    runBlocking {
+                        val handlers = onServerEventHandlers[ev.name] ?: return@runBlocking
+                        for (handler in handlers){
+                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                logException(throwable, "[Kotlin-JVM] Exception thrown in onServerEventHandlers handler")
+                            }) {
+                                handler.invoke(ev.name, *ev.getArgs(handler))
+                            }
+                        }
+                    }
+                }
+
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_RESOURCE_START -> {
+                    // main() invokation is enough
+//                    val ev = ResourceStartEvent(eventptr)
+//                    for (handler in onResourceStartHandlers)
+//                    {
+//                        if(ev.resource != null && ev.resource!!.name == name)
+//                        {
+//                            runBlocking {
+//                                handler()
+//                            }
+//                        }
+//                    }
+                }
+
                 else -> {
-                    Log.warning("[Kotlin-JVM] Unhandled event ${event.type.name}")
+                    logWarning("[Kotlin-JVM] Unhandled event ${event.type.name}")
                 }
             }
 
             !event.wasCancelled
         } catch (e: Throwable)
         {
-            Log.exception(e, "[Kotlin-JVM] Exception when invoking event handler")
+            logException(e, "[Kotlin-JVM] Exception when invoking event handler")
             false
         }
     }
@@ -143,7 +178,7 @@ class Resource internal constructor(resourceptr: Pointer) {
         runBlocking {
             for (handler in onTickHandlers)
                 launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                    Log.exception(throwable, "[Kotlin-JVM] Exception thrown in onTick handler")
+                    logException(throwable, "[Kotlin-JVM] Exception thrown in onTick handler")
                 }) { handler() }
         }
     }
@@ -173,6 +208,27 @@ class Resource internal constructor(resourceptr: Pointer) {
     private val onPlayerDeathHandlers = arrayListOf<(PlayerDeathEvent) -> Boolean>()
     fun onPlayerDeath(f: (PlayerDeathEvent) -> Boolean) {
         onPlayerDeathHandlers.add(f)
+    }
+
+    // Server event
+    private val onServerEventHandlers = hashMapOf<String, HashSet<ServerEvent.Handler>>()
+    fun onServerEvent(name: String, func: Function<*>) {
+        val handler = ServerEvent.Handler(func)
+        if (!onServerEventHandlers.containsKey(name))
+            onServerEventHandlers[name] = hashSetOf(handler)
+        else onServerEventHandlers[name]?.add(handler)
+    }
+
+    // Resource Start
+//    private val onResourceStartHandlers = arrayListOf<() -> Unit>()
+//    fun onResourceStart(f: () -> Unit) {
+//        onResourceStartHandlers.add(f)
+//    }
+
+    // Resource Start
+    private val onServerStartHandlers = arrayListOf<() -> Unit>()
+    fun onServerStart(f: () -> Unit) {
+        onServerStartHandlers.add(f)
     }
 
     // Tick
