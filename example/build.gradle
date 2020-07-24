@@ -19,15 +19,3 @@ jar {
         )
     }
 }
-
-task composeResource() {
-    doLast {
-        new File("$buildDir/libs/resource.cfg").text =
-                """
-type: kotlin-jvm
-name: Kotlin example resource
-main: "example.jar"
-"""
-    }
-}
-jar.finalizedBy composeResource

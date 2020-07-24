@@ -17,6 +17,23 @@ fun main(res: Resource)
     // is js by default
 //    res.clientType = "js"
 
+//    val veh = Vehicle("adder", Float3(10, 10, 75), Float3(0, 0, 0))
+////    GlobalScope.launch {
+////        while(true)
+////        {
+////            delay(100)
+////            logInfo("Pre rot:  ${veh.rot}")
+//////            veh.pos = Float3(10, 10, 80)
+////            veh.rot += 0.1f
+////            logInfo("Post rot: ${veh.rot}")
+////        }
+////    }
+//    res.onTick {
+//        logInfo("Pre rot:  ${veh.rot}")
+//        veh.rot += 0.1f
+//        logInfo("Post rot: ${veh.rot}")
+//    }
+
     res.onPlayerConnect {
         logInfo("Player connected!")
         it.player.spawn(Float3(0, 0, 72))

@@ -11,3 +11,6 @@ out/
 \.vscode/
 bin/*
 lib/*
+example/client/node_modules/
+
+example/client/src/*.js

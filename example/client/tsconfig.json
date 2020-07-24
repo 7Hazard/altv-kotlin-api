@@ -1,0 +1,11 @@
+{
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES6",
+    "typeRoots": [
+      "node_modules/@altv"
+    ],
+    "removeComments": true
+  }
+}
