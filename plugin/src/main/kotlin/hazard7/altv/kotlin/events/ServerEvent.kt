@@ -148,10 +148,11 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
     internal class Handler internal constructor(val func: Function<*>) {
         val invoker by lazy {
             val method = func.javaClass.declaredMethods[1] // seems to always be the second one (with param types)
-            if(!method.trySetAccessible())
-            {
-                throw RuntimeException("Could not make handler callable")
-            }
+//            if(!method.trySetAccessible())
+//            {
+//                throw RuntimeException("Could not make handler callable")
+//            }
+            method.isAccessible = true
             method
         }
 
