@@ -7,8 +7,9 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
+    - uses: FranzDiebold/github-env-vars-action@v1.2.0
     - uses: actions/checkout@v1
-    
+
     - name: Cache gradle
       id: cache
       uses: actions/cache@v1
@@ -22,8 +23,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+        server-id: github
+        settings-path: ${{ github.workspace }}
 
     - name: Build JAR
       run: gradle build
@@ -35,10 +36,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
-        release_name: ${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
-        draft: ${{ github.ref == 'refs/heads/dev' }}
-        prerelease: ${{ github.ref != 'refs/heads/release' }}
+        tag_name: ${{ env.GITHUB_REF_NAME_SLUG }}-${{ github.run_number }}
+        release_name: ${{ env.GITHUB_REF_NAME_SLUG }}-${{ github.run_number }}
+        draft: false
+        prerelease: false
 
     - name: Upload plugin
       if: github.ref == 'refs/heads/master'
