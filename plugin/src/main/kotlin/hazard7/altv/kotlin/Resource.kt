@@ -95,83 +95,7 @@ class Resource internal constructor(resourceptr: Pointer) {
     }
 
     internal val on_event = CAPIExtra.OnEventFn { resourceptr, eventptr ->
-        try {
-            val event = Event(eventptr)
-
-            when (event.type)
-            {
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {
-                    val ev = PlayerConnectEvent(eventptr)
-                    runBlocking {
-                        for (handler in onPlayerConnectHandlers) {
-                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerConnect handler")
-                            }) { handler(ev) }
-                        }
-                    }
-                }
-
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {
-                    val ev = PlayerDisconnectEvent(eventptr)
-                    runBlocking {
-                        for (handler in onPlayerDisconnectHandlers){
-                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDisconnect handler")
-                            }) { handler(ev) }
-                        }
-                    }
-                }
-
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {
-                    val ev = PlayerDeathEvent(eventptr)
-                    runBlocking {
-                        for (handler in onPlayerDeathHandlers){
-                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
-                            }) { handler(ev) }
-                        }
-                    }
-                }
-
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_SERVER_SCRIPT_EVENT -> {
-                    val ev = ServerEvent(eventptr)
-                    runBlocking {
-                        val handlers = onServerEventHandlers[ev.name] ?: return@runBlocking
-                        for (handler in handlers){
-                            launch(CoroutineExceptionHandler { coroutineContext, throwable ->
-                                logException(throwable, "[Kotlin-JVM] Exception thrown in onServerEventHandlers handler")
-                            }) {
-                                handler.invoke(ev.name, *ev.getArgs(handler))
-                            }
-                        }
-                    }
-                }
-
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_RESOURCE_START -> {
-                    // main() invokation is enough
-//                    val ev = ResourceStartEvent(eventptr)
-//                    for (handler in onResourceStartHandlers)
-//                    {
-//                        if(ev.resource != null && ev.resource!!.name == name)
-//                        {
-//                            runBlocking {
-//                                handler()
-//                            }
-//                        }
-//                    }
-                }
-
-                else -> {
-                    logWarning("[Kotlin-JVM] Unhandled event ${event.type.name}")
-                }
-            }
-
-            !event.wasCancelled
-        } catch (e: Throwable)
-        {
-            logException(e, "[Kotlin-JVM] Exception when invoking event handler")
-            false
-        }
+        true
     }
 
     internal val on_tick = CAPIExtra.OnResourceTickFn { resource ->
@@ -193,25 +117,25 @@ class Resource internal constructor(resourceptr: Pointer) {
 
     ////// Events //////
     // Player Connect
-    private val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
+    internal val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
     fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) {
         onPlayerConnectHandlers.add(f)
     }
 
     // Player Disconnect
-    private val onPlayerDisconnectHandlers = arrayListOf<(PlayerDisconnectEvent) -> Boolean>()
+    internal val onPlayerDisconnectHandlers = arrayListOf<(PlayerDisconnectEvent) -> Boolean>()
     fun onPlayerDisconnect(f: (PlayerDisconnectEvent) -> Boolean) {
         onPlayerDisconnectHandlers.add(f)
     }
 
     // Player Death
-    private val onPlayerDeathHandlers = arrayListOf<(PlayerDeathEvent) -> Boolean>()
+    internal val onPlayerDeathHandlers = arrayListOf<(PlayerDeathEvent) -> Boolean>()
     fun onPlayerDeath(f: (PlayerDeathEvent) -> Boolean) {
         onPlayerDeathHandlers.add(f)
     }
 
     // Server event
-    private val onServerEventHandlers = hashMapOf<String, HashSet<ServerEvent.Handler>>()
+    internal val onServerEventHandlers = hashMapOf<String, HashSet<ServerEvent.Handler>>()
     fun onServerEvent(name: String, func: Function<*>) {
         val handler = ServerEvent.Handler(func)
         if (!onServerEventHandlers.containsKey(name))
@@ -219,20 +143,14 @@ class Resource internal constructor(resourceptr: Pointer) {
         else onServerEventHandlers[name]?.add(handler)
     }
 
-    // Resource Start
-//    private val onResourceStartHandlers = arrayListOf<() -> Unit>()
-//    fun onResourceStart(f: () -> Unit) {
-//        onResourceStartHandlers.add(f)
+    // Server Start
+//    internal val onServerStartHandlers = arrayListOf<() -> Unit>()
+//    fun onServerStart(f: () -> Unit) {
+//        onServerStartHandlers.add(f)
 //    }
 
-    // Resource Start
-    private val onServerStartHandlers = arrayListOf<() -> Unit>()
-    fun onServerStart(f: () -> Unit) {
-        onServerStartHandlers.add(f)
-    }
-
     // Tick
-    private val onTickHandlers = arrayListOf<() -> Unit>()
+    internal val onTickHandlers = arrayListOf<() -> Unit>()
     fun onTick(f: () -> Unit) {
         onTickHandlers.add(f)
     }

@@ -3,6 +3,7 @@ package hazard7.altv.kotlin
 import hazard7.altv.jvm.AltStringView
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.jvm.CAPIExtra
+import hazard7.altv.kotlin.events.Event
 
 fun main()
 {
@@ -22,6 +23,8 @@ fun main()
             AltStringView("kotlin-jvm").ptr(),
             script_runtime
     )
+    CAPI.func.alt_ICore_SubscribeEvent(CAPI.core, CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_ALL, Event.handler, null)
+
     logInfo("[Kotlin-JVM] Registered runtime for 'kotlin-jvm' resource type")
 }
 
