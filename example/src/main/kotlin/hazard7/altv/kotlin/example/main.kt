@@ -35,12 +35,17 @@ fun main(res: Resource)
 //    }
 
     res.onPlayerConnect {
-        logInfo("Player connected!")
+        logInfo("Player ${it.player.name} connected!")
         it.player.spawn(Float3(0, 0, 72))
         it.player.setModel("s_m_y_airworker")
 
         Vehicle("oppressor2", Float3(2, 2, 75), Float3(0, 0, 0))
 
+        true
+    }
+
+    res.onPlayerDisconnect {
+        logInfo("Player ${it.player.name} disconnected!")
         true
     }
 
