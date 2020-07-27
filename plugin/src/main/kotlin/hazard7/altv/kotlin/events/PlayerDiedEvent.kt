@@ -6,9 +6,9 @@ import hazard7.altv.kotlin.entities.Player
 import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 
-class PlayerDeathEvent internal constructor(pointer: Pointer) : Event(pointer) {
+class PlayerDiedEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
+    val pointer = CAPI.func.alt_CEvent_to_alt_CPlayerDeathEvent(ceventptr)
     val player = run {
-        assert(thread == Thread.currentThread())
         val ref = CAPI.alt_RefBase_RefStore_IPlayer()
         CAPI.func.alt_CPlayerDeathEvent_GetTarget(pointer, ref.pointer)
         Player(ref.ptr.get())

@@ -24,7 +24,8 @@ open class Event internal constructor(pointer: Pointer) {
                 // Player
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {event = PlayerConnectEvent(cevent)}
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {event = PlayerDisconnectEvent(cevent)}
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {event = PlayerDeathEvent(cevent)}
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {event = PlayerDiedEvent(cevent)}
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DAMAGE -> {event = PlayerRecievedDamageEvent(cevent)}
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_ENTER_VEHICLE -> {event = PlayerEnteredVehicleEvent(cevent)}
                 CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_LEAVE_VEHICLE -> {event = PlayerLeftVehicleEvent(cevent)}
 
@@ -65,10 +66,20 @@ open class Event internal constructor(pointer: Pointer) {
 
                     CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {
                         runBlocking {
-                            for (handler in resource.onPlayerDeathHandlers){
+                            for (handler in resource.onPlayerDiedHandlers){
                                 launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                     logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
-                                }) { handler(event as PlayerDeathEvent) }
+                                }) { handler(event as PlayerDiedEvent) }
+                            }
+                        }
+                    }
+
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DAMAGE -> {
+                        runBlocking {
+                            for (handler in resource.onPlayerRecievedDamageHandlers){
+                                launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                    logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
+                                }) { handler(event as PlayerRecievedDamageEvent) }
                             }
                         }
                     }

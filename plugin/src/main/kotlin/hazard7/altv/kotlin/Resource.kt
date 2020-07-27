@@ -116,22 +116,24 @@ class Resource internal constructor(resourceptr: Pointer) {
     }
 
     ////// Events //////
-    // Player Connect
     internal val onPlayerConnectHandlers = arrayListOf<(PlayerConnectEvent) -> Boolean>()
     fun onPlayerConnect(f: (PlayerConnectEvent) -> Boolean) {
         onPlayerConnectHandlers.add(f)
     }
 
-    // Player Disconnect
     internal val onPlayerDisconnectHandlers = arrayListOf<(PlayerDisconnectEvent) -> Boolean>()
     fun onPlayerDisconnect(f: (PlayerDisconnectEvent) -> Boolean) {
         onPlayerDisconnectHandlers.add(f)
     }
 
-    // Player Death
-    internal val onPlayerDeathHandlers = arrayListOf<(PlayerDeathEvent) -> Boolean>()
-    fun onPlayerDeath(f: (PlayerDeathEvent) -> Boolean) {
-        onPlayerDeathHandlers.add(f)
+    internal val onPlayerDiedHandlers = arrayListOf<(PlayerDiedEvent) -> Boolean>()
+    fun onPlayerDied(f: (PlayerDiedEvent) -> Boolean) {
+        onPlayerDiedHandlers.add(f)
+    }
+
+    internal val onPlayerRecievedDamageHandlers = arrayListOf<(PlayerRecievedDamageEvent) -> Boolean>()
+    fun onPlayerRecievedDamage(f: (PlayerRecievedDamageEvent) -> Boolean) {
+        onPlayerRecievedDamageHandlers.add(f)
     }
 
     internal val onPlayerEnteredVehicleHandlers = arrayListOf<(PlayerEnteredVehicleEvent) -> Boolean>()
@@ -144,7 +146,6 @@ class Resource internal constructor(resourceptr: Pointer) {
         onPlayerLeftVehicleHandlers.add(f)
     }
 
-    // Server event
     internal val onServerEventHandlers = hashMapOf<String, HashSet<ServerEvent.Handler>>()
     fun onServerEvent(name: String, func: Function<*>) {
         val handler = ServerEvent.Handler(func)
@@ -153,7 +154,6 @@ class Resource internal constructor(resourceptr: Pointer) {
         else onServerEventHandlers[name]?.add(handler)
     }
 
-    // Server Start
 //    internal val onServerStartHandlers = arrayListOf<() -> Unit>()
 //    fun onServerStart(f: () -> Unit) {
 //        onServerStartHandlers.add(f)

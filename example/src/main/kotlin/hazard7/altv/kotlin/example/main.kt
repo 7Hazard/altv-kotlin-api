@@ -2,9 +2,7 @@ package hazard7.altv.kotlin.example
 
 import hazard7.altv.kotlin.Resource
 import hazard7.altv.kotlin.entities.Vehicle
-import hazard7.altv.kotlin.events.Event
 import hazard7.altv.kotlin.events.ServerEvent
-import hazard7.altv.kotlin.logException
 import hazard7.altv.kotlin.logInfo
 import hazard7.altv.kotlin.math.Float3
 import kotlinx.coroutines.GlobalScope
@@ -49,7 +47,7 @@ fun main(res: Resource)
         true
     }
 
-    res.onPlayerDeath {
+    res.onPlayerDied {
         // wait 2 sec then revive, in a coroutine
         GlobalScope.launch {
             logInfo("Player ${it.player.name} died at ${it.player.pos}!")
@@ -60,6 +58,11 @@ fun main(res: Resource)
             logInfo("Revived player to ${it.player.health} hp")
         }
 
+        true
+    }
+
+    res.onPlayerRecievedDamage {
+        logInfo("Player ${it.target.name} was damaged for ${it.damage} hp!")
         true
     }
 
