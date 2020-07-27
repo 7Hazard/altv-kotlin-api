@@ -21,14 +21,18 @@ open class Event internal constructor(pointer: Pointer) {
 
             when (event.type)
             {
-                // Processed events
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> { event = PlayerConnectEvent(cevent) }
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> { event = PlayerDisconnectEvent(cevent) }
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> { event = PlayerDeathEvent(cevent) }
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_SERVER_SCRIPT_EVENT -> { event = ServerEvent(cevent) }
+                // Player
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_CONNECT -> {event = PlayerConnectEvent(cevent)}
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DISCONNECT -> {event = PlayerDisconnectEvent(cevent)}
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_DEATH -> {event = PlayerDeathEvent(cevent)}
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_ENTER_VEHICLE -> {event = PlayerEnteredVehicleEvent(cevent)}
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_LEAVE_VEHICLE -> {event = PlayerLeftVehicleEvent(cevent)}
 
-                // Skipped events
-                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_RESOURCE_START -> { return@alt_ICore_SubscribeEvent_cb_Callback true }
+                // Misc
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_SERVER_SCRIPT_EVENT -> {event = ServerEvent(cevent)}
+
+                // Skipped
+                CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_RESOURCE_START -> {return@alt_ICore_SubscribeEvent_cb_Callback true}
 
                 else -> {
                     logWarning("[Kotlin-JVM] Internally unhandled event ${event.type.name}")
@@ -65,6 +69,26 @@ open class Event internal constructor(pointer: Pointer) {
                                 launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                     logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                                 }) { handler(event as PlayerDeathEvent) }
+                            }
+                        }
+                    }
+
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_ENTER_VEHICLE -> {
+                        runBlocking {
+                            for (handler in resource.onPlayerEnteredVehicleHandlers){
+                                launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                    logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
+                                }) { handler(event as PlayerEnteredVehicleEvent) }
+                            }
+                        }
+                    }
+
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_PLAYER_LEAVE_VEHICLE -> {
+                        runBlocking {
+                            for (handler in resource.onPlayerLeftVehicleHandlers){
+                                launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                    logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
+                                }) { handler(event as PlayerLeftVehicleEvent) }
                             }
                         }
                     }

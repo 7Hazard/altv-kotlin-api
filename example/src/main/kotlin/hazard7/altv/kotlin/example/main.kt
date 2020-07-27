@@ -63,6 +63,16 @@ fun main(res: Resource)
         true
     }
 
+    res.onPlayerEnteredVehicle {
+        logInfo("Player ${it.player.name} entered a vehicle!")
+        true
+    }
+
+    res.onPlayerLeftVehicle {
+        logInfo("Player ${it.player.name} left a vehicle!")
+        true
+    }
+
     res.onServerEvent("test") { v: Int ->
         logInfo("TEST EVENT CALLED, RAND VAL $v")
     }

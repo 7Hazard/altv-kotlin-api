@@ -134,6 +134,16 @@ class Resource internal constructor(resourceptr: Pointer) {
         onPlayerDeathHandlers.add(f)
     }
 
+    internal val onPlayerEnteredVehicleHandlers = arrayListOf<(PlayerEnteredVehicleEvent) -> Boolean>()
+    fun onPlayerEnteredVehicle(f: (PlayerEnteredVehicleEvent) -> Boolean) {
+        onPlayerEnteredVehicleHandlers.add(f)
+    }
+
+    internal val onPlayerLeftVehicleHandlers = arrayListOf<(PlayerLeftVehicleEvent) -> Boolean>()
+    fun onPlayerLeftVehicle(f: (PlayerLeftVehicleEvent) -> Boolean) {
+        onPlayerLeftVehicleHandlers.add(f)
+    }
+
     // Server event
     internal val onServerEventHandlers = hashMapOf<String, HashSet<ServerEvent.Handler>>()
     fun onServerEvent(name: String, func: Function<*>) {
