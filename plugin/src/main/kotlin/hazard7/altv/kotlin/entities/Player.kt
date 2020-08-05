@@ -35,6 +35,11 @@ class Player internal constructor(pointer: Pointer)
         )
     }
 
+    fun giveWeapon(weapon: String, ammo: Int, equip: Boolean)
+    {
+        CAPI.func.alt_IPlayer_GiveWeapon(player, hash(weapon), ammo, equip)
+    }
+
 //    fun triggerEvent(name:String, vararg args: Any)
 //    {
 ////        throw NotImplementedError()

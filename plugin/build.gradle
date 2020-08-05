@@ -8,7 +8,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 //    implementation "org.reflections:reflections:0.9.11"
 
-    implementation 'com.github.7Hazard:altv-jvm-module:da8f064'
+    if(System.env['ALTV_KOTLIN_JVM_MODULE_PATH'] != null)
+        implementation files(System.env['ALTV_KOTLIN_JVM_MODULE_PATH'])
+    else
+        implementation 'com.github.7Hazard:altv-jvm-module:dev-83'
 }
 
 archivesBaseName = 'altv-kotlin'

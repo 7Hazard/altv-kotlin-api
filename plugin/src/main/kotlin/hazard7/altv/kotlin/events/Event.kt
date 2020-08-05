@@ -3,12 +3,12 @@ package hazard7.altv.kotlin.events
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.Resource
 import hazard7.altv.kotlin.logException
+import hazard7.altv.kotlin.logInfo
 import hazard7.altv.kotlin.logWarning
 import jnr.ffi.Pointer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
 
 open class Event internal constructor(pointer: Pointer) {
     internal val thread = Thread.currentThread()
