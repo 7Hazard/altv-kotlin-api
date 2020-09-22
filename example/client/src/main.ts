@@ -17,7 +17,7 @@ enum Permission
   All
 }
 
-altv.log("BÖGFITTA")
+altv.log("KOTLIN TEST")
 
 let state = altv.getPermissionState(Permission.ScreenCapture)
 altv.log(`CURRENT STATE: ${PermissionState[state]}`)
@@ -27,7 +27,7 @@ async function takePicture()
   let result = await altv.requestPermission(Permission.ScreenCapture)
   altv.log(`EARLY PERMISSION STATE IS ${PermissionState[result]}`)
 
-  let state = altv.saveScreenshot("bogfitta")
+  let state = altv.saveScreenshot("test")
   altv.log(`SCREENSHOT PERMISSION STATE WAS ${PermissionState[state]}`)
 }
 
