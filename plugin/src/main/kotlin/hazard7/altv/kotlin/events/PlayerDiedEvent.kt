@@ -16,7 +16,8 @@ class PlayerDiedEvent internal constructor(ceventptr: Pointer) : Event(ceventptr
     val killer = run {
         val ref = CAPI.alt_RefBase_RefStore_IEntity()
         CAPI.func.alt_CPlayerDeathEvent_GetKiller(pointer, ref.pointer)
-        Entity(ref.ptr.get())
+        if(ref.ptr.get() != null) Entity(ref.ptr.get())
+        else null
     }
     val weapon = CAPI.func.alt_CPlayerDeathEvent_GetWeapon(pointer)
 }

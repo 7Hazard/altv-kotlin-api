@@ -16,7 +16,8 @@ class PlayerRecievedDamageEvent internal constructor(ceventptr: Pointer) : Event
     val attacker = run {
         val ref = CAPI.alt_RefBase_RefStore_IEntity()
         CAPI.func.alt_CPlayerDamageEvent_GetAttacker(pointer, ref.pointer)
-        Entity(ref.ptr.get())
+        if(ref.ptr.get() != null) Entity(ref.ptr.get())
+        else null
     }
     val damage = CAPI.func.alt_CPlayerDamageEvent_GetDamage(pointer)
     val weapon = CAPI.func.alt_CPlayerDamageEvent_GetWeapon(pointer)
