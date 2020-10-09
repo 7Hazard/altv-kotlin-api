@@ -1,44 +1,46 @@
 package hazard7.altv.kotlin.entities
 
 import hazard7.altv.jvm.CAPI
+import hazard7.altv.kotlin.*
 import hazard7.altv.kotlin.StringView
-import hazard7.altv.kotlin.hash
-import hazard7.altv.kotlin.layout
 import hazard7.altv.kotlin.math.Float3
-import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
-import jnr.ffi.Struct
+import kotlinx.coroutines.runBlocking
 
 class Player internal constructor(pointer: Pointer)
     : Entity(CAPI.func.alt_IPlayer_to_alt_IEntity(pointer))
 {
-    private val player: Pointer = pointer
+    internal val player: Pointer = pointer
 
-    val name by lazy { StringView { ptr -> CAPI.func.alt_IPlayer_GetName(player, ptr) } }
+    val name = StringView { ptr -> CAPI.func.alt_IPlayer_GetName(player, ptr) }
 
+    fun setHealth(value: Short) = nextTick { CAPI.func.alt_IPlayer_SetHealth(player, (value+100).toShort()) }
     var health: Short
         get() = (CAPI.func.alt_IPlayer_GetHealth(player) - 100).toShort()
-        set(value) = CAPI.func.alt_IPlayer_SetHealth(player, (value+100).toShort())
+        set(value) = runBlocking { setHealth(value).await() }
 
+    fun setModel(value: Int) = nextTick {
+        CAPI.func.alt_IPlayer_SetModel(player, value)
+    }
     var model
         get() = CAPI.func.alt_IPlayer_GetModel(player)
-        set(value) = CAPI.func.alt_IPlayer_SetModel(player, value)
+        set(value) = runBlocking { setModel(value).await() }
 
-    fun setModel(name: String) { CAPI.func.alt_IPlayer_SetModel(player, hash(name)) }
+    suspend fun setModel(name: String) = setModel(hash(name)).await()
 
-    fun spawn(pos: Float3, delay: Int = 0)
-    {
+    fun spawn(pos: Float3, delay: Int = 0) = nextTick {
         CAPI.func.alt_IPlayer_Spawn(
-                player,
-                pos.layout().pointer,
-                delay
+            player,
+            pos.layout().pointer,
+            delay
         )
     }
 
-    fun giveWeapon(weapon: String, ammo: Int, equip: Boolean)
-    {
+    fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) = nextTick {
         CAPI.func.alt_IPlayer_GiveWeapon(player, hash(weapon), ammo, equip)
     }
+//    suspend fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) =
+//        giveWeaponAsync(weapon, ammo, equip).await()
 
 //    fun triggerEvent(name:String, vararg args: Any)
 //    {

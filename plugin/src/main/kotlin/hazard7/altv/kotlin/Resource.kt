@@ -13,6 +13,7 @@ import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
+import kotlin.reflect.KFunction
 
 
 class Resource internal constructor(resourceptr: Pointer) {
@@ -20,8 +21,9 @@ class Resource internal constructor(resourceptr: Pointer) {
         internal val ptrmap = HashMap<Pointer, Resource>()
     }
 
-//    private val resourceptr = pointer // not needed
+    //    private val resourceptr = pointer // not needed
     val name = StringView { ptr -> CAPI.func.alt_IResource_GetName(resourceptr, ptr) }
+
     // js as client type by default
     var clientType = "js"
 
@@ -34,8 +36,7 @@ class Resource internal constructor(resourceptr: Pointer) {
             logInfo("[Kotlin-JVM] Set client type to '$curtype' for '$name'")
 
             true
-        } catch (e: Throwable)
-        {
+        } catch (e: Throwable) {
             logException(e, "[Kotlin-JVM] Exception when making client resource")
             false
         }
@@ -55,7 +56,7 @@ class Resource internal constructor(resourceptr: Pointer) {
         try {
             val jar = JarFile(jarfile)
             val mainclass = jar.manifest.mainAttributes.getValue("Main-Class")
-            if(mainclass == null) {
+            if (mainclass == null) {
                 logError("[Kotlin-JVM] Could not get Main-Class from manifest")
                 return@StartFn false
             }
@@ -77,10 +78,11 @@ class Resource internal constructor(resourceptr: Pointer) {
 
             true
         } catch (e: Throwable) {
-            logError("[Kotlin-JVM] Exception while loading resource '$name'"
-                    + "\n\t Message: " + e.localizedMessage
-                    + "\n\t Cause: " + e.cause
-                    + "\n\t Ext: " + e.toString()
+            logError(
+                "[Kotlin-JVM] Exception while loading resource '$name'"
+                        + "\n\t Message: " + e.localizedMessage
+                        + "\n\t Cause: " + e.cause
+                        + "\n\t Ext: " + e.toString()
                 //+"\n\tStack trace: "
             )
             e.printStackTrace()
@@ -153,11 +155,12 @@ class Resource internal constructor(resourceptr: Pointer) {
             onServerEventHandlers[name] = hashSetOf(handler)
         else onServerEventHandlers[name]?.add(handler)
     }
-
-//    internal val onServerStartHandlers = arrayListOf<() -> Unit>()
-//    fun onServerStart(f: () -> Unit) {
-//        onServerStartHandlers.add(f)
-//    }
+    fun onServerEvent(name: String, func: KFunction<*>) {
+        val handler = ServerEvent.Handler(func)
+        if (!onServerEventHandlers.containsKey(name))
+            onServerEventHandlers[name] = hashSetOf(handler)
+        else onServerEventHandlers[name]?.add(handler)
+    }
 
     // Tick
     internal val onTickHandlers = arrayListOf<() -> Unit>()

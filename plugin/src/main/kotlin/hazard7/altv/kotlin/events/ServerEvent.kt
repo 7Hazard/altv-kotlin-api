@@ -7,8 +7,11 @@ import hazard7.altv.kotlin.altview
 import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import java.lang.Exception
-import java.lang.RuntimeException
 import java.lang.reflect.MalformedParametersException
+import java.lang.reflect.Method
+import kotlin.coroutines.suspendCoroutine
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.reflect
 
 class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
     val pointer = CAPI.func.alt_CEvent_to_alt_CServerScriptEvent(ceventptr)
@@ -22,10 +25,16 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
         val args = CAPI.alt_Array_RefBase_RefStore_constIMValue(
             CAPI.func.alt_CServerScriptEvent_GetArgs(pointer)
         )
-        val count = args.size.get().toInt()
-        val params = handler.invoker.parameterTypes
-        val ret = Array<Any?>(count) { null }
-        for (i in 0 until count)
+        val eventArgsCount = args.size.get().toInt()
+        val params = handler.invoker!!.parameterTypes
+
+        if (handler.paramCount > eventArgsCount)
+            throw MalformedParametersException("Event '$name' with $eventArgsCount args was sent to ${handler.paramCount} params handler")
+        else if (handler.paramCount < eventArgsCount)
+            logWarning("Recieved event '$name' with $eventArgsCount args did not match handlers ${handler.paramCount} parameters")
+
+        val ret = Array<Any?>(eventArgsCount) { null }
+        for (i in 0 until eventArgsCount)
         {
             val mvalueref = CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Access_unsignedlonglong_1(args.pointer, i.toLong())
             val mval = CAPI.func.alt_RefBase_RefStore_constIMValue_Get(mvalueref)
@@ -145,36 +154,39 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
         }
     }
 
-    internal class Handler internal constructor(val func: Function<*>) {
-        val invoker by lazy {
-            val method = func.javaClass.declaredMethods[1] // seems to always be the second one (with param types)
-//            if(!method.trySetAccessible())
-//            {
-//                throw RuntimeException("Could not make handler callable")
-//            }
+    internal class Handler {
+        var func: Function<*>? = null
+        var isSuspend = false
+        var invoker: Method? = null
+        val paramCount by lazy {
+            if(isSuspend) invoker!!.parameterCount-1
+            else invoker!!.parameterCount
+        }
+        constructor(func: KFunction<*>)
+        {
+            this.func = func
+            isSuspend = func.reflect()?.isSuspend!!
+            val method = func.javaClass.declaredMethods[1]
             method.isAccessible = true
-            method
+            invoker = method
+        }
+        constructor(func: Function<*>)
+        {
+            this.func = func
+            val method = func.javaClass.declaredMethods[1] // seems to always be the second one (with param types)
+            method.isAccessible = true
+            invoker = method
         }
 
-        fun invoke(name: String, vararg args: Any?) {
-            val hc = invoker.parameterCount
-            val ec = args.size
-            if (hc > ec)
-                throw MalformedParametersException("Event '$name' with $ec args was sent to $hc params handler")
-            else if (hc < ec)
+        suspend fun invoke(name: String, vararg args: Any?) {
+            if(isSuspend)
             {
-                logWarning("Recieved event '${name}' with ${ec} args did not match handlers ${hc} parameters")
-                invoker.invoke(func, *(args.copyOfRange(0, hc))) // discard args overflow
+                suspendCoroutine<Unit> {
+                    invoker?.invoke(func, *args, it)
+                }
+            } else {
+                invoker?.invoke(func, *args)
             }
-            else invoker.invoke(func, *args)
         }
     }
 }
-
-/**
- * Server script events, annotation for function handlers
- * @param name the name if the event to handle for
- */
-//@Retention(AnnotationRetention.RUNTIME)
-//@Target(AnnotationTarget.FUNCTION)
-//annotation class OnServerEvent(val name: String)
