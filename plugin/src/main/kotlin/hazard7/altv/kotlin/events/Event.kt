@@ -62,8 +62,6 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerConnect handler")
                                     }) {
-                                        if(Thread.currentThread() == mainThread) logError("IS MAIN THREAD")
-                                        else logError("IS NOTTTTT MAIN THREAD")
                                         handler(event as PlayerConnectEvent)
                                     }
                                 }
@@ -86,8 +84,6 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                                     }) {
-                                        if(Thread.currentThread() == mainThread) logError("IS MAIN THREAD")
-                                        else logError("IS NOTTTTT MAIN THREAD")
                                         handler(event as PlayerDiedEvent)
                                         logInfo("DONE")
                                     }
@@ -101,8 +97,6 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                                     }) {
-                                        if(Thread.currentThread() == mainThread) logError("IS MAIN THREAD")
-                                        else logError("IS NOTTTTT MAIN THREAD")
                                         handler(event as PlayerRecievedDamageEvent)
                                     }
                                 }
@@ -115,8 +109,6 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                                     }) {
-                                        if(Thread.currentThread() == mainThread) logError("IS MAIN THREAD")
-                                        else logError("IS NOTTTTT MAIN THREAD")
                                         handler(event as PlayerEnteredVehicleEvent)
                                     }
                                 }
@@ -129,8 +121,6 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                                     }) {
-                                        if(Thread.currentThread() == mainThread) logError("IS MAIN THREAD")
-                                        else logError("IS NOTTTTT MAIN THREAD")
                                         handler(event as PlayerLeftVehicleEvent)
                                     }
                                 }
@@ -145,8 +135,6 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onServerEventHandlers handler")
                                     }) {
-                                        if(Thread.currentThread() == mainThread) logError("IS MAIN THREAD")
-                                        else logError("IS NOTTTTT MAIN THREAD")
                                         handler.invoke(event.name, *event.getArgs(handler))
                                     }
                                 }

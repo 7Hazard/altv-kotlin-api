@@ -99,7 +99,6 @@ class MainDispatcher : MainCoroutineDispatcher()//, Delay
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         if(Thread.currentThread() == mainThread)
         {
-            logInfo("INSTANT NEXT TICK")
             executeNextTickCallback(block)
         }
         else
