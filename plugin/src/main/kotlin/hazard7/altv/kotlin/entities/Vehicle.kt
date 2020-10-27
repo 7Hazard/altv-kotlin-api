@@ -28,7 +28,7 @@ class Vehicle internal constructor(pointer: Pointer) : Entity(CAPI.func.alt_IVeh
         }
     )
 
-    fun setBodyHealth(value: Int) = nextTick {
+    fun setBodyHealth(value: UInt) = nextTick {
         CAPI.func.alt_IVehicle_SetBodyHealth(vehicle, value.toInt())
     }
     var bodyHealth: UInt

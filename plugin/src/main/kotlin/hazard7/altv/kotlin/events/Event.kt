@@ -73,7 +73,9 @@ open class Event internal constructor(pointer: Pointer) {
                                 for (handler in resource.onPlayerDisconnectHandlers){
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDisconnect handler")
-                                    }) { handler(event as PlayerDisconnectEvent) }
+                                    }) {
+                                        handler(event as PlayerDisconnectEvent)
+                                    }
                                 }
                             }
                         }
@@ -85,7 +87,6 @@ open class Event internal constructor(pointer: Pointer) {
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onPlayerDeath handler")
                                     }) {
                                         handler(event as PlayerDiedEvent)
-                                        logInfo("DONE")
                                     }
                                 }
                             }

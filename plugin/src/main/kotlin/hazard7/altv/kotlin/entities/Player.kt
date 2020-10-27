@@ -22,11 +22,10 @@ class Player internal constructor(pointer: Pointer)
     fun setModel(value: Int) = nextTick {
         CAPI.func.alt_IPlayer_SetModel(player, value)
     }
+    fun setModel(name: String) = setModel(hash(name))
     var model
         get() = CAPI.func.alt_IPlayer_GetModel(player)
         set(value) = runBlocking { setModel(value).await() }
-
-    suspend fun setModel(name: String) = setModel(hash(name)).await()
 
     fun spawn(pos: Float3, delay: Int = 0) = nextTick {
         CAPI.func.alt_IPlayer_Spawn(

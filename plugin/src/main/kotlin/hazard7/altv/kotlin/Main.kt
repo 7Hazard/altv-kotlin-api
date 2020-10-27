@@ -6,10 +6,8 @@ import hazard7.altv.jvm.CAPIExtra
 import hazard7.altv.kotlin.events.Event
 import kotlinx.coroutines.*
 import kotlinx.coroutines.internal.MainDispatcherFactory
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 var mainThread = Thread.currentThread()
 
