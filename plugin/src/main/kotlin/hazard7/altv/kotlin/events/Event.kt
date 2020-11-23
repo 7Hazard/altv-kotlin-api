@@ -2,6 +2,7 @@ package hazard7.altv.kotlin.events
 
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.*
+import hazard7.altv.kotlin.entities.Player
 import jnr.ffi.Pointer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -37,9 +38,13 @@ open class Event internal constructor(pointer: Pointer) {
                         event = PlayerLeftVehicleEvent(cevent)
                     }
 
+
                     // Misc
                     CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_SERVER_SCRIPT_EVENT -> {
                         event = ServerEvent(cevent)
+                    }
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_CLIENT_SCRIPT_EVENT -> {
+                        event = ClientEvent(cevent)
                     }
 
                     // Skipped
@@ -136,7 +141,21 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onServerEventHandlers handler")
                                     }) {
-                                        handler.invoke(event.name, *event.getArgs(handler))
+                                        handler.invoke(*event.getArgs(handler))
+                                    }
+                                }
+                            }
+                        }
+
+                        CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_CLIENT_SCRIPT_EVENT -> {
+                            runBlocking {
+                                event as ClientEvent
+                                val handlers = resource.onClientEventHandlers[event.name] ?: return@runBlocking
+                                for (handler in handlers){
+                                    launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                        logException(throwable, "[Kotlin-JVM] Exception thrown in onClientEventHandlers handler")
+                                    }) {
+                                        handler.invoke(event.player, *event.getArgs(handler))
                                     }
                                 }
                             }

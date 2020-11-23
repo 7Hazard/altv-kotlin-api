@@ -4,18 +4,25 @@ import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.*
 import hazard7.altv.kotlin.StringView
 import hazard7.altv.kotlin.altview
+import hazard7.altv.kotlin.entities.Player
 import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import java.lang.Exception
 import java.lang.reflect.MalformedParametersException
 import java.lang.reflect.Method
+import java.security.InvalidParameterException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.reflect
 
-class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
-    val pointer = CAPI.func.alt_CEvent_to_alt_CServerScriptEvent(ceventptr)
-    val name = StringView { CAPI.func.alt_CServerScriptEvent_GetName(pointer, it) }
+class ClientEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
+    val pointer = CAPI.func.alt_CEvent_to_alt_CClientScriptEvent(ceventptr)
+    val name = StringView { CAPI.func.alt_CClientScriptEvent_GetName(pointer, it) }
+    val player = run {
+        val ref = CAPI.alt_RefBase_RefStore_IPlayer()
+        CAPI.func.alt_CClientScriptEvent_GetTarget(pointer, ref.pointer)
+        Player(ref.ptr.get())
+    }
 
     internal class ParamTypeMismatch(paramNum: Int, eventType: String, handlerType: String) :
         Exception("Event arg $paramNum was a $eventType, expected $handlerType")
@@ -23,10 +30,10 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
 
     internal fun getArgs(handler: Handler): Array<Any?> {
         val args = CAPI.alt_Array_RefBase_RefStore_constIMValue(
-            CAPI.func.alt_CServerScriptEvent_GetArgs(pointer)
+            CAPI.func.alt_CClientScriptEvent_GetArgs(pointer)
         )
         val eventArgsCount = args.size.get().toInt()
-        val params = handler.invoker!!.parameterTypes
+        val params = handler.invoker!!.parameterTypes.copyOfRange(1, handler.invoker!!.parameterTypes.size)
 
         if (handler.paramCount > eventArgsCount)
             throw MalformedParametersException("Event '$name' with $eventArgsCount args was sent to ${handler.paramCount} params handler")
@@ -159,8 +166,8 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
         var isSuspend = false
         var invoker: Method? = null
         val paramCount by lazy {
-            if(isSuspend) invoker!!.parameterCount-1
-            else invoker!!.parameterCount
+            if(isSuspend) invoker!!.parameterCount-2
+            else invoker!!.parameterCount-1
         }
         constructor(func: KFunction<*>)
         {
@@ -169,6 +176,11 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
             val method = func.javaClass.declaredMethods[1]
             method.isAccessible = true
             invoker = method
+
+            val params = invoker!!.parameterTypes
+            if(params.size < 1 || params[0] != Player::class.java) {
+                throw InvalidParameterException("First parameter must be a Player")
+            }
         }
         constructor(func: Function<*>)
         {
@@ -176,6 +188,11 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
             val method = func.javaClass.declaredMethods[1] // seems to always be the second one (with param types)
             method.isAccessible = true
             invoker = method
+
+            val params = invoker!!.parameterTypes
+            if(params.size < 1 || params[0] != Player::class.java) {
+                throw InvalidParameterException("First parameter must be a Player")
+            }
         }
 
         suspend fun invoke(vararg args: Any?) {

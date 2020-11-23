@@ -162,6 +162,20 @@ class Resource internal constructor(resourceptr: Pointer) {
         else onServerEventHandlers[name]?.add(handler)
     }
 
+    internal val onClientEventHandlers = hashMapOf<String, HashSet<ClientEvent.Handler>>()
+    fun onClientEvent(name: String, func: Function<*>) {
+        val handler = ClientEvent.Handler(func)
+        if (!onClientEventHandlers.containsKey(name))
+            onClientEventHandlers[name] = hashSetOf(handler)
+        else onClientEventHandlers[name]?.add(handler)
+    }
+    fun onClientEvent(name: String, func: KFunction<*>) {
+        val handler = ClientEvent.Handler(func)
+        if (!onClientEventHandlers.containsKey(name))
+            onClientEventHandlers[name] = hashSetOf(handler)
+        else onClientEventHandlers[name]?.add(handler)
+    }
+
     // Tick
     internal val onTickHandlers = arrayListOf<() -> Unit>()
     fun onTick(f: () -> Unit) {
