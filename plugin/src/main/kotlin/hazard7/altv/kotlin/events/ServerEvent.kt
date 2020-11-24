@@ -90,7 +90,7 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
     }
 
     companion object {
-        fun send(name: String, vararg args: Any)
+        fun emit(name: String, vararg args: Any)
         {
             val emptyMValue = CAPI.alt_RefBase_RefStore_constIMValue()
             emptyMValue.ptr.set(0)
