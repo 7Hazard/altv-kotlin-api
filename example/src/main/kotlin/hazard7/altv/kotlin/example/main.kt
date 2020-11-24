@@ -1,6 +1,7 @@
 package hazard7.altv.kotlin.example
 
 import hazard7.altv.kotlin.Resource
+import hazard7.altv.kotlin.entities.Player
 import hazard7.altv.kotlin.entities.Vehicle
 import hazard7.altv.kotlin.events.ServerEvent
 import hazard7.altv.kotlin.logInfo
@@ -25,17 +26,33 @@ fun main(res: Resource)
     }
 
     val veh = Vehicle("adder", Float3(10, 10, 75), Float3(0, 0, 0))
+    Vehicle("buzzard", Float3(-15, 20, 75), Float3(0, 0, 0))
+//    Vehicle("annihilator", Float3(-15, 30, 75), Float3(0, 0, 0))
 
-////    GlobalScope.launch {
-////        while(true)
-////        {
-////            delay(100)
-////            logInfo("Pre rot:  ${veh.rot}")
-//////            veh.pos = Float3(10, 10, 80)
-////            veh.rot += 0.1f
-////            logInfo("Post rot: ${veh.rot}")
-////        }
-////    }
+//    GlobalScope.launch {
+//        while(true)
+//        {
+//            delay(100)
+//            logInfo("Pre rot:  ${veh.rot}")
+////            veh.pos = Float3(10, 10, 80)
+//            veh.rot += 0.1f
+//            logInfo("Post rot: ${veh.rot}")
+//        }
+//    }
+
+//    GlobalScope.launch {
+//        veh.bodyHealth = 700u;
+//        logInfo("after new: ${veh.bodyHealth}")
+//        while (true)
+//        {
+//            delay(100)
+//            val newhealth = Random(System.currentTimeMillis()).nextInt(500, 1000).toUInt()
+//            logInfo("current: ${veh.bodyHealth}, new: ${newhealth}")
+//            veh.bodyHealth = newhealth
+//            logInfo("after new: ${veh.bodyHealth}")
+//        }
+//    }
+
     res.onTick {
 //        if(veh.owner != null)
 //        {
@@ -46,9 +63,10 @@ fun main(res: Resource)
 //        val owner = veh.owner
 //        veh.setOwner(null, true)
 
-//        var rot = veh.rot
+//        val rot = veh.rot
 //        rot.z += 0.2f
 //        veh.rot = rot
+//        logInfo("x: ${veh.rot.x}, y: ${veh.rot.y}, z: ${veh.rot.z}")
 
 //        logInfo("Current health ${veh.bodyHealth}")
 //        veh.bodyHealth-=3u
@@ -67,6 +85,8 @@ fun main(res: Resource)
         Vehicle("sultan", Float3(2, 2, 75), Float3(0, 0, 0))
         Vehicle("voltic2", Float3(4, 4, 75), Float3(0, 0, 0))
 
+        it.player.emit("welcome")
+
         true
     }
 
@@ -81,7 +101,7 @@ fun main(res: Resource)
             logInfo("Player ${it.player.name} died at ${it.player.pos}!")
 
             delay(2000)
-            it.player.spawn(it.player.pos)
+            it.player.spawn(it.player.pos).await()
             it.player.health = 50
             logInfo("Revived player to ${it.player.health} hp")
         }
@@ -119,9 +139,16 @@ fun main(res: Resource)
         logInfo("2ND TEST EVENT CALLED, RAND VAL $v")
     }
 
+    res.onClientEvent("test", { player: Player, v: Int ->
+        logInfo("PLAYER ${player.name} triggered test event with $v")
+    })
+//    res.onClientEvent("test", {
+//        logInfo("BAAAD")
+//    })
+
     Vehicle("police3", Float3(10, 10, 75), Float3())
 
-    ServerEvent.send("test", Random(System.currentTimeMillis()).nextInt(69, 421))
+    ServerEvent.emit("test", Random(System.currentTimeMillis()).nextInt(69, 421))
 
     logInfo("Started example resource!")
 }

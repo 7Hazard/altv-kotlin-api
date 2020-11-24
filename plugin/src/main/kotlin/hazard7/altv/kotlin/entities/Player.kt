@@ -38,71 +38,69 @@ class Player internal constructor(pointer: Pointer)
     fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) = nextTick {
         CAPI.func.alt_IPlayer_GiveWeapon(player, hash(weapon), ammo, equip)
     }
-//    suspend fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) =
-//        giveWeaponAsync(weapon, ammo, equip).await()
 
-//    fun triggerEvent(name:String, vararg args: Any)
-//    {
-////        throw NotImplementedError()
-//
-//        // Could maybe be done with CAPI.alt_Array_RefBase_RefStore_constIMValue but whatever
-//        val mvalueArgs = CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Create_2(args.size.toLong(),
-//                Pointer.wrap(CAPI.runtime, 0))
-//
-//        val badargs: MutableList<Pair<Int, Any>> = mutableListOf()
-//
-//        for((index, arg) in args.withIndex())
-//        {
-//            val mvalue: Pointer = when (arg)
-//            {
-//                is Boolean -> CAPI.func.alt_ICore_CreateMValueBool(CAPI.core, arg)
-//
-//                // integers
-//                is Byte -> CAPI.func.alt_ICore_CreateMValueInt(CAPI.core, arg.toLong())
-//                is UByte -> CAPI.func.alt_ICore_CreateMValueUInt(CAPI.core, arg.toLong())
-//                is Short -> CAPI.func.alt_ICore_CreateMValueInt(CAPI.core, arg.toLong())
-//                is UShort -> CAPI.func.alt_ICore_CreateMValueUInt(CAPI.core, arg.toLong())
-//                is Int -> CAPI.func.alt_ICore_CreateMValueInt(CAPI.core, arg.toLong())
-//                is UInt -> CAPI.func.alt_ICore_CreateMValueUInt(CAPI.core, arg.toLong())
-//                is Long -> CAPI.func.alt_ICore_CreateMValueInt(CAPI.core, arg.toLong())
-//                is ULong -> CAPI.func.alt_ICore_CreateMValueUInt(CAPI.core, arg.toLong())
-//
-//                // decimals
-//                is Float -> CAPI.func.alt_ICore_CreateMValueDouble(CAPI.core, arg.toDouble())
-//                is Double -> CAPI.func.alt_ICore_CreateMValueDouble(CAPI.core, arg.toDouble())
-//
-//                // vectors, not supportive of structures in MValue
-////                is Float3 -> {
-////                    val s = CAPI.alt_Vector_float_3_PointLayout()
-////                    s.x.set(pos.x)
-////                    s.y.set(pos.y)
-////                    s.z.set(pos.z)
-////                    CAPI.func.alt_ICore_CreateMValueVector3(CAPI.core, Struct.getMemory(s))
-////                }
-//
-//                else -> {
-//                    badargs.add(Pair(index, arg))
-//                    Pointer.wrap(CAPI.runtime, 0)
-//                }
-//            }
-//
-//        }
-//
-//        if(badargs.size != 0)
-//        {
-//            var msg = ""
-//            for (arg in args)
-//            {
-//                msg += "\n    "+arg.toString()
-//            }
-//
-//            // clean up before throwing
-//
-//            throw TypeCastException("Bad event types passed:"+msg)
-//        }
-//
-//        CAPI.func.alt_ICore_TriggerClientEvent(CAPI.core, player, AltStringView(name).ptr(), mvalueArgs)
-//        CAPI.func.alt_Array_RefBase_RefStore_constIMValue_free(mvalueArgs)
-//    }
+    fun emit(name: String, vararg args: Any)
+    {
+        val emptyMValue = CAPI.alt_RefBase_RefStore_constIMValue()
+        emptyMValue.ptr.set(0)
+        val arr = CAPI.alt_Array_RefBase_RefStore_constIMValue(
+            CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Create_CAPI_Heap()
+        )
+        CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Reserve(arr.pointer, args.size.toLong())
+
+        fun getBaseRefMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
+        {
+            // TODO: PROFILE HEAP VS STACK METHODS
+
+            // Ref<MValueBool>
+            val refmvaluetype = create()
+            // MValueBool
+            val mvaluetype = CAPI.func.alt_RefBase_RefStore_constIMValue_Get(refmvaluetype)
+            // MValue
+            val mvalue = cast(mvaluetype)
+            // Ref<MValue>
+            val refmvalue = CAPI.func.alt_RefBase_RefStore_constIMValue_Create_4_CAPI_Heap(mvalue)
+            CAPI.func.alt_IMValue_RemoveRef(mvalue)
+            return refmvalue
+        }
+
+        for ((i, arg) in args.withIndex()) {
+            val refmvalue = when (arg) {
+                is Boolean -> {
+                    getBaseRefMValue(
+                        { CAPI.func.alt_ICore_CreateMValueBool_CAPI_Heap(CAPI.core, arg) },
+                        { CAPI.func.alt_IMValueBool_to_alt_IMValue(it) }
+                    )
+                }
+                is Int -> {
+                    getBaseRefMValue(
+                        { CAPI.func.alt_ICore_CreateMValueInt_CAPI_Heap(CAPI.core, arg.toLong()) },
+                        { CAPI.func.alt_IMValueInt_to_alt_IMValue(it) }
+                    )
+                }
+                is String -> {
+                    getBaseRefMValue(
+                        { CAPI.func.alt_ICore_CreateMValueString_CAPI_Heap(CAPI.core, arg.altstring.pointer) },
+                        { CAPI.func.alt_IMValueString_to_alt_IMValue(it) }
+                    )
+                }
+                else -> {
+                    throw TypeCastException("Unsupported event arg type '${arg::class.java}', value: '$arg'")
+                }
+            }
+
+            // refcount=1, ++ after push
+            CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Push(arr.pointer, refmvalue)
+            // refcount=2, ok to capi free, will deref
+            CAPI.func.alt_RefBase_RefStore_constIMValue_CAPI_Free(refmvalue)
+            // refcount = 1
+        }
+
+        val playerRef = CAPI.alt_RefBase_RefStore_IPlayer()
+        playerRef.ptr.set(player)
+        CAPI.func.alt_ICore_TriggerClientEvent(CAPI.core, playerRef.pointer, name.altview.ptr(), arr.pointer)
+        // refcounts=2
+        CAPI.func.alt_Array_RefBase_RefStore_constIMValue_CAPI_Free(arr.pointer)
+        // refcounts=1
+    }
 }
-
