@@ -31,6 +31,7 @@ internal fun StringView(f: (Pointer) -> Unit): String
     f(s.pointer)
     return s.string
 }
+internal fun StringView(ptr: Pointer) = CAPI.alt_StringView(ptr).string
 
 internal val String.altview get() = AltStringView(this)
 internal val String.altstring: CAPI.alt_String get() {

@@ -46,6 +46,9 @@ open class Event internal constructor(pointer: Pointer) {
                     CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_CLIENT_SCRIPT_EVENT -> {
                         event = ClientEvent(cevent)
                     }
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_CONSOLE_COMMAND_EVENT -> {
+                        event = ConsoleCommandEvent(cevent)
+                    }
 
                     // Skipped
                     CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_RESOURCE_START -> {
@@ -156,6 +159,20 @@ open class Event internal constructor(pointer: Pointer) {
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onClientEventHandlers handler")
                                     }) {
                                         handler.invoke(event.player, *event.getArgs(handler))
+                                    }
+                                }
+                            }
+                        }
+
+                        CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_CONSOLE_COMMAND_EVENT -> {
+                            runBlocking {
+                                event as ConsoleCommandEvent
+                                val handlers = resource.onConsoleCommandHandlers[event.command] ?: return@runBlocking
+                                for (handler in handlers){
+                                    launch(CoroutineExceptionHandler { coroutineContext, throwable ->
+                                        logException(throwable, "[Kotlin-JVM] Exception thrown in onClientEventHandlers handler")
+                                    }) {
+                                        handler(event.args)
                                     }
                                 }
                             }

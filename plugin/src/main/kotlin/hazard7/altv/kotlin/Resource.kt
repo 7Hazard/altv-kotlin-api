@@ -163,17 +163,24 @@ class Resource internal constructor(resourceptr: Pointer) {
     }
 
     internal val onClientEventHandlers = hashMapOf<String, HashSet<ClientEvent.Handler>>()
-    fun onClientEvent(name: String, func: Function<*>) {
+    fun onClientEvent(event: String, func: Function<*>) {
         val handler = ClientEvent.Handler(func)
-        if (!onClientEventHandlers.containsKey(name))
-            onClientEventHandlers[name] = hashSetOf(handler)
-        else onClientEventHandlers[name]?.add(handler)
+        if (!onClientEventHandlers.containsKey(event))
+            onClientEventHandlers[event] = hashSetOf(handler)
+        else onClientEventHandlers[event]?.add(handler)
     }
-    fun onClientEvent(name: String, func: KFunction<*>) {
+    fun onClientEvent(event: String, func: KFunction<*>) {
         val handler = ClientEvent.Handler(func)
-        if (!onClientEventHandlers.containsKey(name))
-            onClientEventHandlers[name] = hashSetOf(handler)
-        else onClientEventHandlers[name]?.add(handler)
+        if (!onClientEventHandlers.containsKey(event))
+            onClientEventHandlers[event] = hashSetOf(handler)
+        else onClientEventHandlers[event]?.add(handler)
+    }
+
+    internal val onConsoleCommandHandlers = hashMapOf<String, HashSet<(List<String>) -> Unit>>()
+    fun onConsoleCommand(command: String, f: (List<String>) -> Unit) {
+        if (!onConsoleCommandHandlers.containsKey(command))
+            onConsoleCommandHandlers[command] = hashSetOf(f)
+        else onConsoleCommandHandlers[command]?.add(f)
     }
 
     // Tick

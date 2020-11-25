@@ -150,5 +150,10 @@ fun main(res: Resource)
 
     ServerEvent.emit("test", Random(System.currentTimeMillis()).nextInt(69, 421))
 
+    res.onConsoleCommand("hi", {
+        if(it.size > 0)
+            logInfo("Hello ${it[0]}")
+    })
+
     logInfo("Started example resource!")
 }
