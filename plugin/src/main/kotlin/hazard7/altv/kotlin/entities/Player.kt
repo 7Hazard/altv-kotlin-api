@@ -7,7 +7,7 @@ import hazard7.altv.kotlin.math.Float3
 import jnr.ffi.Pointer
 import kotlinx.coroutines.runBlocking
 
-class Player internal constructor(pointer: Pointer)
+open class Player internal constructor(pointer: Pointer)
     : Entity(CAPI.func.alt_IPlayer_to_alt_IEntity(pointer))
 {
     internal val player: Pointer = pointer

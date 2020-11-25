@@ -9,7 +9,7 @@ import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import kotlinx.coroutines.runBlocking
 
-class Vehicle internal constructor(pointer: Pointer) : Entity(CAPI.func.alt_IVehicle_to_alt_IEntity(pointer)) {
+open class Vehicle internal constructor(pointer: Pointer) : Entity(CAPI.func.alt_IVehicle_to_alt_IEntity(pointer)) {
     internal val vehicle = pointer
 
     constructor(modelname: String, position: Float3, rotation: Float3)
