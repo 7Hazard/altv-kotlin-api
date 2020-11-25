@@ -12,7 +12,6 @@ class ConsoleCommandEvent internal constructor(ceventptr: Pointer) : Event(ceven
         val args = arrayListOf<String>()
         val array = CAPI.func.alt_CConsoleCommandEvent_GetArgs(pointer)
         val size = CAPI.func.alt_Array_StringView_GetSize(array)
-        logInfo("SIZE $size")
         for (i in 0..size-1) {
             val stringview = CAPI.func.alt_Array_StringView_Access_unsignedlonglong_1(array, i)
             val str = StringView(stringview)
