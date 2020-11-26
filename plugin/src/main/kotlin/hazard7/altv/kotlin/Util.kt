@@ -3,10 +3,12 @@ package hazard7.altv.kotlin
 import hazard7.altv.jvm.AltStringView
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.jvm.StringUtil
+import hazard7.altv.kotlin.events.ClientEvent
 import hazard7.altv.kotlin.math.Float3
 import jnr.ffi.Memory
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
+import java.lang.Exception
 import java.nio.charset.Charset
 
 fun hash(string: String) = CAPI.func.alt_ICore_Hash(CAPI.core, AltStringView(string).ptr())
@@ -48,4 +50,57 @@ internal fun Vector3f(f: (Pointer) -> Unit): Float3
     val s = CAPI.alt_Vector_float_3_PointLayout()
     f(s.pointer)
     return Float3(s.x.get(), s.y.get(), s.z.get())
+}
+
+class MValueTypeMismatch(val type: String) : Exception()
+inline fun <reified T> getMValue(mvalueref: Pointer): T
+{
+    val mval = CAPI.func.alt_RefBase_RefStore_constIMValue_Get(mvalueref)
+    val type = CAPI.func.alt_IMValue_GetType(mval)
+
+    when (type) {
+        CAPI.alt_IMValue_Type.ALT_IMVALUE_TYPE_BOOL -> {
+            when (T::class) {
+                Boolean::class ->
+                    return CAPI.func.alt_IMValueBool_Value(CAPI.func.alt_IMValue_to_alt_IMValueBool(mval)) as T
+                Int::class ->
+                    return (if (CAPI.func.alt_IMValueBool_Value(CAPI.func.alt_IMValue_to_alt_IMValueBool(mval))) 1 else 0) as T
+                String::class ->
+                    return CAPI.func.alt_IMValueBool_Value(CAPI.func.alt_IMValue_to_alt_IMValueBool(mval)).toString() as T
+                else ->
+                    throw MValueTypeMismatch("Boolean")
+            }
+        }
+        CAPI.alt_IMValue_Type.ALT_IMVALUE_TYPE_INT -> {
+            when (T::class) {
+                Boolean::class ->
+                    return (CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)) == 1L) as T
+                Int::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toInt() as T
+                UInt::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toUInt() as T
+                Long::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toLong() as T
+                ULong::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toULong() as T
+                Float::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toFloat() as T
+                Double::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toDouble() as T
+                String::class ->
+                    return CAPI.func.alt_IMValueInt_Value(CAPI.func.alt_IMValue_to_alt_IMValueInt(mval)).toString() as T
+                else -> {
+                    throw MValueTypeMismatch("Long")
+                }
+            }
+        }
+        CAPI.alt_IMValue_Type.ALT_IMVALUE_TYPE_STRING -> {
+            if (T::class != String::class)
+                throw MValueTypeMismatch("String")
+            return StringView { CAPI.func.alt_IMValueString_Value(CAPI.func.alt_IMValue_to_alt_IMValueString(mval), it) } as T
+        }
+        else -> {
+            throw NotImplementedError("Unhandled MValue type ${type.name}")
+        }
+    }
 }

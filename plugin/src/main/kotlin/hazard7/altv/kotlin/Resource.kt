@@ -225,18 +225,18 @@ class Resource internal constructor(resourceptr: Pointer) {
             onServerEventHandlers[name] = hashSetOf(handler)
         else onServerEventHandlers[name]?.add(handler)
     }
-    fun onServerEvent(name: String, func: KFunction<*>) {
+    fun onServerEvent(event: String, func: KFunction<*>) {
         val handler = ServerEvent.Handler(func)
-        if (!onServerEventHandlers.containsKey(name))
-            onServerEventHandlers[name] = hashSetOf(handler)
-        else onServerEventHandlers[name]?.add(handler)
+        if (!onServerEventHandlers.containsKey(event))
+            onServerEventHandlers[event] = hashSetOf(handler)
+        else onServerEventHandlers[event]?.add(handler)
     }
 
     internal val onClientEventHandlers = hashMapOf<String, HashSet<(ClientEvent) -> Unit>>()
     fun onClientEvent(event: String, f: (ClientEvent) -> Unit) {
-        if (!onClientEventHandlers.containsKey(name))
-            onClientEventHandlers[name] = hashSetOf(f)
-        else onClientEventHandlers[name]?.add(f)
+        if (!onClientEventHandlers.containsKey(event))
+            onClientEventHandlers[event] = hashSetOf(f)
+        else onClientEventHandlers[event]?.add(f)
     }
 
     internal val onConsoleCommandHandlers = hashMapOf<String, HashSet<(List<String>) -> Unit>>()
