@@ -20,12 +20,12 @@ internal fun Float3.layout(): CAPI.alt_Vector_float_3_PointLayout
     return s
 }
 
-internal val Struct.pointer get() = Struct.getMemory(this)
+val Struct.pointer get() = Struct.getMemory(this)
 
 internal val CAPI.alt_StringView.string
     get() = this.data.get().getString(0, this.size.get().toInt(), Charset.forName("UTF-8"))
 
-internal fun StringView(f: (Pointer) -> Unit): String
+fun StringView(f: (Pointer) -> Unit): String
 {
     val s = CAPI.alt_StringView()
     f(s.pointer)

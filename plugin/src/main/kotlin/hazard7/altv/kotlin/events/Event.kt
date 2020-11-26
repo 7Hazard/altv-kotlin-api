@@ -158,7 +158,7 @@ open class Event internal constructor(pointer: Pointer) {
                                     launch(CoroutineExceptionHandler { coroutineContext, throwable ->
                                         logException(throwable, "[Kotlin-JVM] Exception thrown in onClientEventHandlers handler")
                                     }) {
-                                        handler.invoke(event.player, *event.getArgs(handler))
+                                        handler(event)
                                     }
                                 }
                             }

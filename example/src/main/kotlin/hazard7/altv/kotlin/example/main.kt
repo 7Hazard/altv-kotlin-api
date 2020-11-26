@@ -172,9 +172,11 @@ fun main(res: Resource)
         logInfo("2ND TEST EVENT CALLED, RAND VAL $v")
     }
 
-    res.onClientEvent("test", { player: Player, v: Int ->
+    res.onClientEvent("test") {
+        val player = it.getPlayer(res)
+        val v = it.getArg<Int>(0)
         logInfo("PLAYER ${player.name} triggered test event with $v")
-    })
+    }
 //    res.onClientEvent("test", {
 //        logInfo("BAAAD")
 //    })
