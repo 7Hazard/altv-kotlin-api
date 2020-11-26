@@ -3,6 +3,10 @@ package hazard7.altv.kotlin
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.jvm.CAPIExtra
 import hazard7.altv.jvm.StringUtil
+import hazard7.altv.kotlin.entities.BaseObject
+import hazard7.altv.kotlin.entities.Entity
+import hazard7.altv.kotlin.entities.Player
+import hazard7.altv.kotlin.entities.Vehicle
 import hazard7.altv.kotlin.events.*
 import jnr.ffi.Pointer
 import jnr.ffi.Struct
@@ -10,6 +14,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.lang.RuntimeException
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
@@ -19,6 +24,71 @@ import kotlin.reflect.KFunction
 class Resource internal constructor(resourceptr: Pointer) {
     companion object {
         internal val ptrmap = HashMap<Pointer, Resource>()
+        internal val defaultPlayerFactory = DefaultPlayerFactory()
+        internal val defaultVehicleFactory = DefaultVehicleFactory()
+    }
+
+    interface ObjectFactory<T : BaseObject> {
+        fun create(pointer: Pointer): T
+    }
+
+    class DefaultPlayerFactory : ObjectFactory<Player> {
+        override fun create(pointer: Pointer) = Player(pointer)
+    }
+    private var playerFactory: ObjectFactory<*> = defaultPlayerFactory
+    fun <T: Player> setPlayerFactory(factory: ObjectFactory<T>) {
+        playerFactory = factory
+    }
+    private val ptrToPlayer = HashMap<Pointer, Player>()
+    internal fun getOrCreatePlayer(pointer: Pointer): Player {
+        return if(ptrToPlayer.containsKey(pointer))
+            ptrToPlayer[pointer]!!
+        else {
+            val player = playerFactory.create(pointer) as Player
+            ptrToPlayer[pointer] = player
+            ptrToEntity[pointer] = player
+            player
+        }
+    }
+
+    class DefaultVehicleFactory : ObjectFactory<Vehicle> {
+        override fun create(pointer: Pointer) = Vehicle(pointer)
+    }
+    private var vehicleFactory: ObjectFactory<*> = defaultVehicleFactory
+    fun <T: Vehicle> setVehicleFactory(factory: ObjectFactory<T>) {
+        vehicleFactory = factory
+    }
+    internal val ptrToVehicle = HashMap<Pointer, Vehicle>()
+    internal fun getOrCreateVehicle(pointer: Pointer): Vehicle {
+        return if(ptrToVehicle.containsKey(pointer))
+            ptrToVehicle[pointer]!!
+        else {
+            val vehicle = vehicleFactory.create(pointer) as Vehicle
+            ptrToVehicle[pointer] = vehicle
+            ptrToEntity[pointer] = vehicle
+            vehicle
+        }
+    }
+
+    private val ptrToEntity = HashMap<Pointer, Entity>()
+    internal fun getOrCreateEntity(pointer: Pointer): Entity {
+        if(ptrToEntity.containsKey(pointer))
+            return ptrToEntity[pointer]!!
+        else {
+            val type = CAPI.func.alt_IEntity_GetType(pointer)
+            when(type)
+            {
+                CAPI.alt_IBaseObject_Type.ALT_IBASEOBJECT_TYPE_PLAYER -> {
+                    return getOrCreatePlayer(CAPI.func.alt_IEntity_to_alt_IPlayer(pointer))
+                }
+                CAPI.alt_IBaseObject_Type.ALT_IBASEOBJECT_TYPE_VEHICLE -> {
+                    return getOrCreateVehicle(CAPI.func.alt_IEntity_to_alt_IVehicle(pointer))
+                }
+                else -> {
+                    throw RuntimeException("Internally unhandled entity ${type.name}, report to API developers")
+                }
+            }
+        }
     }
 
     //    private val resourceptr = pointer // not needed

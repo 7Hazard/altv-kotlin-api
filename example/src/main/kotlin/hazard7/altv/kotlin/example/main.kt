@@ -7,6 +7,7 @@ import hazard7.altv.kotlin.events.ServerEvent
 import hazard7.altv.kotlin.logInfo
 import hazard7.altv.kotlin.math.Float3
 import hazard7.altv.kotlin.nextTick
+import jnr.ffi.Pointer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,7 +59,7 @@ fun main(res: Resource)
 //        {
 //            logInfo("OWNER ${veh.owner!!.name}")
 //        } else {
-//            logInfo("bögfitta")
+//            logInfo("bajja")
 //        }
 //        val owner = veh.owner
 //        veh.setOwner(null, true)
@@ -75,53 +76,85 @@ fun main(res: Resource)
 //        veh.setOwner(owner, false)
     }
 
+    class MyVehicle : Vehicle {
+        constructor(pointer: Pointer) : super(pointer)
+        constructor(modelname: String)
+            : super(modelname, Float3(), Float3())
+
+        val test = "test"
+    }
+    class MyVehicleFactory : Resource.ObjectFactory<MyVehicle> {
+        override fun create(pointer: Pointer): MyVehicle = MyVehicle(pointer)
+    }
+    res.setVehicleFactory(MyVehicleFactory())
+    val dveh = MyVehicle("voltic2")
+    logInfo("Testing derived vehicle: ${dveh.test}")
+
+    class MyPlayer constructor(pointer: Pointer) : Player(pointer)
+    {
+        val test = "test"
+    }
+    class MyPlayerFactory : Resource.ObjectFactory<MyPlayer> {
+        override fun create(pointer: Pointer) = MyPlayer(pointer)
+    }
+    res.setPlayerFactory(MyPlayerFactory())
+
     res.onPlayerConnect {
-        logInfo("Player ${it.player.name} connected!")
-        it.player.spawn(Float3(0, 0, 72))
-        it.player.setModel("s_m_y_airworker")
-        it.player.giveWeapon("CombatPistol", 500, true)
+        // Inheritance
+        val xplayer = it.getPlayer(res) as MyPlayer
+        logInfo("Testing inherited player: ${xplayer.test}")
+
+        logInfo("Player ${xplayer.name} connected!")
+        xplayer.spawn(Float3(0, 0, 72))
+        xplayer.setModel("s_m_y_airworker")
+        xplayer.giveWeapon("CombatPistol", 500, true)
 
         Vehicle("oppressor2", Float3(2, 4, 75), Float3(0, 0, 0))
         Vehicle("sultan", Float3(2, 2, 75), Float3(0, 0, 0))
         Vehicle("voltic2", Float3(4, 4, 75), Float3(0, 0, 0))
 
-        it.player.emit("welcome")
+        xplayer.emit("welcome")
 
         true
     }
 
     res.onPlayerDisconnect {
-        logInfo("Player ${it.player.name} disconnected!")
+        val player = it.getPlayer(res)
+        logInfo("Player ${player.name} disconnected!")
         true
     }
 
     res.onPlayerDied {
+        val player = it.getPlayer(res)
         // wait 2 sec then revive, in a coroutine
         GlobalScope.launch {
-            logInfo("Player ${it.player.name} died at ${it.player.pos}!")
+            logInfo("Player ${player.name} died at ${player.pos}!")
 
             delay(2000)
-            it.player.spawn(it.player.pos).await()
-            it.player.health = 50
-            logInfo("Revived player to ${it.player.health} hp")
+            player.spawn(player.pos).await()
+            player.health = 50
+            logInfo("Revived player to ${player.health} hp")
         }
 
         true
     }
 
     res.onPlayerRecievedDamage {
-        logInfo("Player ${it.target.name} was damaged for ${it.damage} hp!")
+        val player = it.getPlayer(res)
+        logInfo("Player ${player.name} was damaged for ${it.damage} hp!")
         true
     }
 
     res.onPlayerEnteredVehicle {
-        logInfo("Player ${it.player.name} entered a vehicle!")
-        it.player.giveWeapon("weapon_revolver", 50, true)
+        val player = it.getPlayer(res)
+        logInfo("Player ${player.name} entered a vehicle!")
+        player.giveWeapon("weapon_revolver", 50, true)
         true
     }
 
     res.onPlayerLeftVehicle {
-        logInfo("Player ${it.player.name} left a vehicle!")
+        val player = it.getPlayer(res)
+        logInfo("Player ${player.name} left a vehicle!")
         true
     }
 

@@ -18,11 +18,12 @@ import kotlin.reflect.jvm.reflect
 class ClientEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
     val pointer = CAPI.func.alt_CEvent_to_alt_CClientScriptEvent(ceventptr)
     val name = StringView { CAPI.func.alt_CClientScriptEvent_GetName(pointer, it) }
-    val player = run {
+    internal val player = run {
         val ref = CAPI.alt_RefBase_RefStore_IPlayer()
         CAPI.func.alt_CClientScriptEvent_GetTarget(pointer, ref.pointer)
-        Player(ref.ptr.get())
+        ref.ptr.get()
     }
+    fun getPlayer(resource: Resource) = resource.getOrCreatePlayer(player)
 
     internal class ParamTypeMismatch(paramNum: Int, eventType: String, handlerType: String) :
         Exception("Event arg $paramNum was a $eventType, expected $handlerType")

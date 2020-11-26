@@ -26,6 +26,6 @@ open class BaseObject internal constructor(pointer: Pointer) {
         ColShape
     }
 
-    val type by lazy { CAPI.func.alt_IBaseObject_GetType(baseobject).toString() }
+    val type = CAPI.func.alt_IBaseObject_GetType(baseobject).toString()
 }
 
