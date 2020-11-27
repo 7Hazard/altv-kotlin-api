@@ -10,7 +10,7 @@ dependencies {
     if(System.env['ALTV_KOTLIN_JVM_MODULE_PATH'] != null)
         implementation files(System.env['ALTV_KOTLIN_JVM_MODULE_PATH'])
     else
-        implementation 'com.github.7Hazard:altv-jvm-module:dev-83'
+        implementation 'com.github.7Hazard:altv-jvm-module:dev-93'
 }
 
 archivesBaseName = 'altv-kotlin'

@@ -2,7 +2,6 @@ package hazard7.altv.kotlin.events
 
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.*
-import hazard7.altv.kotlin.entities.Player
 import jnr.ffi.Pointer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -50,8 +49,21 @@ open class Event internal constructor(pointer: Pointer) {
                         event = ConsoleCommandEvent(cevent)
                     }
 
+                    // Internally handled
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_REMOVE_BASE_OBJECT_EVENT -> {
+                        event = RemoveBaseObjectEvent(cevent)
+                        for ((ptr, resource) in Resource.ptrmap)
+                        {
+                            resource.deleteObject(event.entity)
+                        }
+                        return@alt_ICore_SubscribeEvent_cb_Callback true
+                    }
+
                     // Skipped
                     CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_RESOURCE_START -> {
+                        return@alt_ICore_SubscribeEvent_cb_Callback true
+                    }
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_REMOVE_ENTITY_EVENT -> {
                         return@alt_ICore_SubscribeEvent_cb_Callback true
                     }
 

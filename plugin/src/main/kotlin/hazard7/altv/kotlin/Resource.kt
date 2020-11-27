@@ -19,6 +19,7 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.jvmName
 
 
 class Resource internal constructor(resourceptr: Pointer) {
@@ -27,6 +28,11 @@ class Resource internal constructor(resourceptr: Pointer) {
         internal val defaultPlayerFactory = DefaultPlayerFactory()
         internal val defaultVehicleFactory = DefaultVehicleFactory()
     }
+
+    private val ptrToPlayer = HashMap<Pointer, Player>()
+    private val ptrToVehicle = HashMap<Pointer, Vehicle>()
+    private val ptrToEntity = HashMap<Pointer, Entity>()
+    private val ptrToBaseObject = HashMap<Pointer, BaseObject>()
 
     interface ObjectFactory<T : BaseObject> {
         fun create(pointer: Pointer): T
@@ -39,14 +45,14 @@ class Resource internal constructor(resourceptr: Pointer) {
     fun <T: Player> setPlayerFactory(factory: ObjectFactory<T>) {
         playerFactory = factory
     }
-    private val ptrToPlayer = HashMap<Pointer, Player>()
     internal fun getOrCreatePlayer(pointer: Pointer): Player {
         return if(ptrToPlayer.containsKey(pointer))
             ptrToPlayer[pointer]!!
         else {
             val player = playerFactory.create(pointer) as Player
-            ptrToPlayer[pointer] = player
-            ptrToEntity[pointer] = player
+            ptrToPlayer[player.playerPtr] = player
+            ptrToEntity[player.entityPtr] = player
+            ptrToBaseObject[player.baseObjectPtr] = player
             player
         }
     }
@@ -58,19 +64,18 @@ class Resource internal constructor(resourceptr: Pointer) {
     fun <T: Vehicle> setVehicleFactory(factory: ObjectFactory<T>) {
         vehicleFactory = factory
     }
-    internal val ptrToVehicle = HashMap<Pointer, Vehicle>()
     internal fun getOrCreateVehicle(pointer: Pointer): Vehicle {
         return if(ptrToVehicle.containsKey(pointer))
             ptrToVehicle[pointer]!!
         else {
             val vehicle = vehicleFactory.create(pointer) as Vehicle
-            ptrToVehicle[pointer] = vehicle
-            ptrToEntity[pointer] = vehicle
+            ptrToVehicle[vehicle.vehiclePtr] = vehicle
+            ptrToEntity[vehicle.entityPtr] = vehicle
+            ptrToBaseObject[vehicle.baseObjectPtr] = vehicle
             vehicle
         }
     }
 
-    private val ptrToEntity = HashMap<Pointer, Entity>()
     internal fun getOrCreateEntity(pointer: Pointer): Entity {
         if(ptrToEntity.containsKey(pointer))
             return ptrToEntity[pointer]!!
@@ -85,9 +90,24 @@ class Resource internal constructor(resourceptr: Pointer) {
                     return getOrCreateVehicle(CAPI.func.alt_IEntity_to_alt_IVehicle(pointer))
                 }
                 else -> {
-                    throw RuntimeException("Internally unhandled entity ${type.name}, report to API developers")
+                    throw RuntimeException("Internally unhandled entity ${type.name}")
                 }
             }
+        }
+    }
+
+    internal fun deleteObject(pointer: Pointer) {
+        val obj = ptrToBaseObject[pointer] ?: return
+
+        for (handler in onBaseObjectDeletedHandlers)
+            handler(obj)
+
+        ptrToBaseObject.remove(pointer)
+        if(obj is Entity) ptrToEntity.remove(pointer)
+        when (obj) {
+            is Player -> ptrToPlayer.remove(obj)
+            is Vehicle -> ptrToVehicle.remove(obj)
+            else -> throw RuntimeException("Internally unhandled object type ${obj::class.jvmName}")
         }
     }
 
@@ -244,6 +264,11 @@ class Resource internal constructor(resourceptr: Pointer) {
         if (!onConsoleCommandHandlers.containsKey(command))
             onConsoleCommandHandlers[command] = hashSetOf(f)
         else onConsoleCommandHandlers[command]?.add(f)
+    }
+
+    internal val onBaseObjectDeletedHandlers = arrayListOf<(BaseObject) -> Unit>()
+    fun onBaseObjectDeleted(f: (BaseObject) -> Unit) {
+        onBaseObjectDeletedHandlers.add(f)
     }
 
     // Tick

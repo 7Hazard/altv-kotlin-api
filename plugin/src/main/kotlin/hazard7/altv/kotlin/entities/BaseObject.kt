@@ -1,18 +1,16 @@
 package hazard7.altv.kotlin.entities
 
 import hazard7.altv.jvm.CAPI
-import hazard7.altv.kotlin.logInfo
 import jnr.ffi.Pointer
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 open class BaseObject internal constructor(pointer: Pointer) {
-    private val baseobject: Pointer = run {
+    internal val baseObjectPtr: Pointer = run {
         CAPI.func.alt_IBaseObject_AddRef(pointer)
         return@run pointer
     }
 
     protected fun finalize() {
-        CAPI.func.alt_IBaseObject_RemoveRef(baseobject)
+        CAPI.func.alt_IBaseObject_RemoveRef(baseObjectPtr)
     }
 
     enum class Type
@@ -26,6 +24,6 @@ open class BaseObject internal constructor(pointer: Pointer) {
         ColShape
     }
 
-    val type = CAPI.func.alt_IBaseObject_GetType(baseobject).toString()
+    val type = CAPI.func.alt_IBaseObject_GetType(baseObjectPtr).toString()
 }
 

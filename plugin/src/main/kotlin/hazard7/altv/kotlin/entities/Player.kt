@@ -10,33 +10,33 @@ import kotlinx.coroutines.runBlocking
 open class Player constructor(pointer: Pointer)
     : Entity(CAPI.func.alt_IPlayer_to_alt_IEntity(pointer))
 {
-    internal val player: Pointer = pointer
+    internal val playerPtr: Pointer = pointer
 
-    val name = StringView { ptr -> CAPI.func.alt_IPlayer_GetName(player, ptr) }
+    val name = StringView { ptr -> CAPI.func.alt_IPlayer_GetName(playerPtr, ptr) }
 
-    fun setHealth(value: Short) = nextTick { CAPI.func.alt_IPlayer_SetHealth(player, (value+100).toShort()) }
+    fun setHealth(value: Short) = nextTick { CAPI.func.alt_IPlayer_SetHealth(playerPtr, (value+100).toShort()) }
     var health: Short
-        get() = (CAPI.func.alt_IPlayer_GetHealth(player) - 100).toShort()
+        get() = (CAPI.func.alt_IPlayer_GetHealth(playerPtr) - 100).toShort()
         set(value) = runBlocking { setHealth(value).await() }
 
     fun setModel(value: Int) = nextTick {
-        CAPI.func.alt_IPlayer_SetModel(player, value)
+        CAPI.func.alt_IPlayer_SetModel(playerPtr, value)
     }
     fun setModel(name: String) = setModel(hash(name))
     var model
-        get() = CAPI.func.alt_IPlayer_GetModel(player)
+        get() = CAPI.func.alt_IPlayer_GetModel(playerPtr)
         set(value) = runBlocking { setModel(value).await() }
 
     fun spawn(pos: Float3, delay: Int = 0) = nextTick {
         CAPI.func.alt_IPlayer_Spawn(
-            player,
+            playerPtr,
             pos.layout().pointer,
             delay
         )
     }
 
     fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) = nextTick {
-        CAPI.func.alt_IPlayer_GiveWeapon(player, hash(weapon), ammo, equip)
+        CAPI.func.alt_IPlayer_GiveWeapon(playerPtr, hash(weapon), ammo, equip)
     }
 
     fun emit(name: String, vararg args: Any)
@@ -97,7 +97,7 @@ open class Player constructor(pointer: Pointer)
         }
 
         val playerRef = CAPI.alt_RefBase_RefStore_IPlayer()
-        playerRef.ptr.set(player)
+        playerRef.ptr.set(playerPtr)
         CAPI.func.alt_ICore_TriggerClientEvent(CAPI.core, playerRef.pointer, name.altview.ptr(), arr.pointer)
         // refcounts=2
         CAPI.func.alt_Array_RefBase_RefStore_constIMValue_CAPI_Free(arr.pointer)

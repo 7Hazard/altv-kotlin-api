@@ -12,25 +12,25 @@ import kotlinx.coroutines.runBlocking
 open class Entity internal constructor(pointer: Pointer)
     : BaseObject(CAPI.func.alt_IEntity_to_alt_IBaseObject(pointer))
 {
-    internal val entity = pointer
+    internal val entityPtr = pointer
 
     fun setPos(value: Float3) = nextTick {
-        CAPI.func.alt_IEntity_SetRotation(entity, value.layout().pointer)
+        CAPI.func.alt_IEntity_SetRotation(entityPtr, value.layout().pointer)
     }
     var pos: Float3
-        get() = Vector3f { CAPI.func.alt_IEntity_GetPosition(entity, it) }
+        get() = Vector3f { CAPI.func.alt_IEntity_GetPosition(entityPtr, it) }
         set(value) = runBlocking { setPos(value).await() }
 
     fun setRot(value: Float3) = nextTick {
-        CAPI.func.alt_IEntity_SetRotation(entity, value.layout().pointer)
+        CAPI.func.alt_IEntity_SetRotation(entityPtr, value.layout().pointer)
     }
     var rot: Float3
-        get() = Vector3f { ptr -> CAPI.func.alt_IEntity_GetRotation(entity, ptr) }
+        get() = Vector3f { ptr -> CAPI.func.alt_IEntity_GetRotation(entityPtr, ptr) }
         set(value) = runBlocking { setRot(value).await() }
 
     val owner: Player? get() {
         val ent = CAPI.alt_RefBase_RefStore_IPlayer();
-        CAPI.func.alt_IEntity_GetNetworkOwner(entity, ent.pointer)
+        CAPI.func.alt_IEntity_GetNetworkOwner(entityPtr, ent.pointer)
         if(ent.ptr.get() == null) return null
         else return Player(ent.ptr.get())
     }
@@ -38,10 +38,10 @@ open class Entity internal constructor(pointer: Pointer)
     fun setOwner(owner: Player?, disableMigration: Boolean) = nextTick {
         val ent = CAPI.alt_RefBase_RefStore_IPlayer()
         if(owner == null) {
-            CAPI.func.alt_IEntity_SetNetworkOwner(entity, ent.pointer, disableMigration)
+            CAPI.func.alt_IEntity_SetNetworkOwner(entityPtr, ent.pointer, disableMigration)
         } else {
-            ent.ptr.set(owner.player)
-            CAPI.func.alt_IEntity_SetNetworkOwner(entity, ent.pointer, false)
+            ent.ptr.set(owner.playerPtr)
+            CAPI.func.alt_IEntity_SetNetworkOwner(entityPtr, ent.pointer, false)
         }
     }
 }

@@ -10,7 +10,7 @@ import jnr.ffi.Pointer
 import kotlinx.coroutines.runBlocking
 
 open class Vehicle constructor(pointer: Pointer) : Entity(CAPI.func.alt_IVehicle_to_alt_IEntity(pointer)) {
-    internal val vehicle = pointer
+    internal val vehiclePtr = pointer
 
     constructor(modelname: String, position: Float3, rotation: Float3)
             : this(hash(modelname), position, rotation)
@@ -29,9 +29,9 @@ open class Vehicle constructor(pointer: Pointer) : Entity(CAPI.func.alt_IVehicle
     )
 
     fun setBodyHealth(value: UInt) = nextTick {
-        CAPI.func.alt_IVehicle_SetBodyHealth(vehicle, value.toInt())
+        CAPI.func.alt_IVehicle_SetBodyHealth(vehiclePtr, value.toInt())
     }
     var bodyHealth: UInt
-        get() = CAPI.func.alt_IVehicle_GetBodyHealth(vehicle).toUInt()
+        get() = CAPI.func.alt_IVehicle_GetBodyHealth(vehiclePtr).toUInt()
         set(value) = runBlocking { setBodyHealth(value).await() }
 }
