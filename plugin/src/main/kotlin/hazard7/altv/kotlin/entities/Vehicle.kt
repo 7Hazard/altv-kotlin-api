@@ -28,10 +28,14 @@ open class Vehicle constructor(pointer: Pointer) : Entity(CAPI.func.alt_IVehicle
         }
     )
 
-    fun setBodyHealth(value: UInt) = nextTick {
-        CAPI.func.alt_IVehicle_SetBodyHealth(vehiclePtr, value.toInt())
+    fun setBodyHealth(value: UInt) = notDeleted {
+        nextTick {
+            CAPI.func.alt_IVehicle_SetBodyHealth(vehiclePtr, value.toInt())
+        }
     }
     var bodyHealth: UInt
-        get() = CAPI.func.alt_IVehicle_GetBodyHealth(vehiclePtr).toUInt()
+        get() = notDeleted {
+            CAPI.func.alt_IVehicle_GetBodyHealth(vehiclePtr).toUInt()
+        }
         set(value) = runBlocking { setBodyHealth(value).await() }
 }

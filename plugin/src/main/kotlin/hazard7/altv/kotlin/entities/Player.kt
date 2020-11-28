@@ -12,35 +12,49 @@ open class Player constructor(pointer: Pointer)
 {
     internal val playerPtr: Pointer = pointer
 
-    val name = StringView { ptr -> CAPI.func.alt_IPlayer_GetName(playerPtr, ptr) }
+    val name = notDeleted {
+        StringView { ptr -> CAPI.func.alt_IPlayer_GetName(playerPtr, ptr) }
+    }
 
-    fun setHealth(value: Short) = nextTick { CAPI.func.alt_IPlayer_SetHealth(playerPtr, (value+100).toShort()) }
+    fun setHealth(value: Short) = nextTick {
+        nextTick { CAPI.func.alt_IPlayer_SetHealth(playerPtr, (value+100).toShort()) }
+    }
     var health: Short
-        get() = (CAPI.func.alt_IPlayer_GetHealth(playerPtr) - 100).toShort()
+        get() = notDeleted {
+            (CAPI.func.alt_IPlayer_GetHealth(playerPtr) - 100).toShort()
+        }
         set(value) = runBlocking { setHealth(value).await() }
 
-    fun setModel(value: Int) = nextTick {
-        CAPI.func.alt_IPlayer_SetModel(playerPtr, value)
+    fun setModel(value: Int) = notDeleted {
+        nextTick {
+            CAPI.func.alt_IPlayer_SetModel(playerPtr, value)
+        }
     }
     fun setModel(name: String) = setModel(hash(name))
     var model
-        get() = CAPI.func.alt_IPlayer_GetModel(playerPtr)
+        get() = notDeleted { CAPI.func.alt_IPlayer_GetModel(playerPtr) }
         set(value) = runBlocking { setModel(value).await() }
 
-    fun spawn(pos: Float3, delay: Int = 0) = nextTick {
-        CAPI.func.alt_IPlayer_Spawn(
-            playerPtr,
-            pos.layout().pointer,
-            delay
-        )
+    fun spawn(pos: Float3, delay: Int = 0) = notDeleted {
+        nextTick {
+            CAPI.func.alt_IPlayer_Spawn(
+                playerPtr,
+                pos.layout().pointer,
+                delay
+            )
+        }
     }
 
-    fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) = nextTick {
-        CAPI.func.alt_IPlayer_GiveWeapon(playerPtr, hash(weapon), ammo, equip)
+    fun giveWeapon(weapon: String, ammo: Int, equip: Boolean) = notDeleted {
+        nextTick {
+            CAPI.func.alt_IPlayer_GiveWeapon(playerPtr, hash(weapon), ammo, equip)
+        }
     }
 
     fun emit(name: String, vararg args: Any)
     {
+        notDeleted {  }
+
         val emptyMValue = CAPI.alt_RefBase_RefStore_constIMValue()
         emptyMValue.ptr.set(0)
         val arr = CAPI.alt_Array_RefBase_RefStore_constIMValue(
