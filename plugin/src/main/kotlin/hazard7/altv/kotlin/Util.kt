@@ -111,8 +111,8 @@ inline fun <reified T> getMValue(f: (mvalueref: Pointer) -> Unit): T {
     return getMValue(mvalueref.pointer)
 }
 
-// creates MValue with creator and return base MValue
-fun createMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
+// creates MValue with creator, play with typed mvalue and return base MValue
+fun createMValue(create: () -> Pointer, play: (Pointer) -> Unit, cast: (Pointer) -> Pointer): Pointer
 {
     // TODO: PROFILE HEAP VS STACK METHODS
 
@@ -120,6 +120,9 @@ fun createMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
     val refmvaluetype = create()
     // MValueBool
     val mvaluetype = CAPI.func.alt_RefBase_RefStore_constIMValue_Get(refmvaluetype)
+
+    play(mvaluetype)
+
     // MValue
     val mvalue = cast(mvaluetype)
     // Ref<MValue>
@@ -128,12 +131,24 @@ fun createMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
     return refmvalue
 }
 
+// creates MValue with creator and return base MValue
+fun createMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
+{
+    return createMValue(create, {}, cast)
+}
+
 /**
  * returns Ref<MValue>
  * must be freed with alt_RefBase_RefStore_constIMValue_CAPI_Free
  */
-fun createMValue(value: Any): Pointer {
+fun createMValue(value: Any?): Pointer {
     return when (value) {
+        null -> {
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueNil_CAPI_Heap(CAPI.core) },
+                { CAPI.func.alt_IMValueBool_to_alt_IMValue(it) }
+            )
+        }
         is Boolean -> {
             createMValue(
                 { CAPI.func.alt_ICore_CreateMValueBool_CAPI_Heap(CAPI.core, value) },
@@ -152,13 +167,60 @@ fun createMValue(value: Any): Pointer {
                 { CAPI.func.alt_IMValueString_to_alt_IMValue(it) }
             )
         }
+        is Array<*> -> {
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueList_CAPI_Heap(CAPI.core, value.size.toLong()) },
+                { mvaluelist ->
+                    for ((i, v) in value.withIndex()){
+                        createMValueAndFree(v) {
+                            CAPI.func.alt_IMValueList_Set(mvaluelist, i.toLong(), it)
+                        }
+                    }
+                },
+                { CAPI.func.alt_IMValueList_to_alt_IMValue(it) },
+            )
+        }
+        is Iterable<*> -> {
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueList_CAPI_Heap(CAPI.core, value.count().toLong()) },
+                { mvaluelist ->
+                    for ((i, v) in value.withIndex()){
+                        createMValueAndFree(v) {
+                            CAPI.func.alt_IMValueList_Set(mvaluelist, i.toLong(), it)
+                        }
+                    }
+                },
+                { CAPI.func.alt_IMValueList_to_alt_IMValue(it) },
+            )
+        }
+        is Map<*, *> -> {
+            for ((key, v) in value) {
+                if(key is String) break;
+                else {
+                    throw TypeCastException("Maps must be of type Map<String, *>")
+                }
+            }
+
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueDict_CAPI_Heap(CAPI.core) },
+                { mvaluedict ->
+                    for ((key, v) in value){
+                        key as String
+                        createMValueAndFree(v) {
+                            CAPI.func.alt_IMValueDict_Set(mvaluedict, key.altStringView.ptr(), it)
+                        }
+                    }
+                },
+                { CAPI.func.alt_IMValueDict_to_alt_IMValue(it) },
+            )
+        }
         else -> {
             throw TypeCastException("Unsupported arg type '${value::class}', value: '$value'")
         }
     }
 }
 
-fun createMValueAndFree(value: Any, f: (mvalue: Pointer) -> Unit) {
+fun createMValueAndFree(value: Any?, f: (mvalue: Pointer) -> Unit) {
     val mvalue = createMValue(value)
     f(mvalue)
     CAPI.func.alt_RefBase_RefStore_constIMValue_CAPI_Free(mvalue)

@@ -26,8 +26,8 @@ fun main(res: Resource)
         }.await()
     }
 
-    val veh = Vehicle("adder", Float3(10, 10, 75), Float3(0, 0, 0))
-    Vehicle("buzzard", Float3(-15, 20, 75), Float3(0, 0, 0))
+    val veh = Vehicle("voltic2", Float3(-15, 20, 75), Float3(0, 0, 0))
+    Vehicle("towtruck", Float3(10, 10, 75), Float3(0, 0, 0))
 //    Vehicle("annihilator", Float3(-15, 30, 75), Float3(0, 0, 0))
 
 //    GlobalScope.launch {
@@ -114,6 +114,10 @@ fun main(res: Resource)
         Vehicle("voltic2", Float3(4, 4, 75), Float3(0, 0, 0))
 
         xplayer.emit("welcome")
+
+        xplayer.emit("arraytest", arrayOf(77, "titi"))
+        xplayer.emit("listtest", listOf(88, "toto"))
+        xplayer.emit("maptest", hashMapOf("val1" to 55, "val2" to 66))
 
         true
     }
