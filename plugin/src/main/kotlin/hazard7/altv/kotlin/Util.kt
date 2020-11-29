@@ -35,8 +35,8 @@ fun StringView(f: (Pointer) -> Unit): String
 }
 internal fun StringView(ptr: Pointer) = CAPI.alt_StringView(ptr).string
 
-internal val String.altview get() = AltStringView(this)
-internal val String.altstring: CAPI.alt_String get() {
+val String.altStringView get() = AltStringView(this)
+internal val String.altString: CAPI.alt_String get() {
     val s = CAPI.alt_String()
     val buf = Memory.allocateDirect(CAPI.runtime, this.length)
     buf.putString(0, this, this.length, StringUtil.UTF8)
@@ -103,4 +103,63 @@ inline fun <reified T> getMValue(mvalueref: Pointer): T
             throw NotImplementedError("Unhandled MValue type ${type.name}")
         }
     }
+}
+
+inline fun <reified T> getMValue(f: (mvalueref: Pointer) -> Unit): T {
+    val mvalueref = CAPI.alt_RefBase_RefStore_constIMValue()
+    f(mvalueref.pointer)
+    return getMValue(mvalueref.pointer)
+}
+
+// creates MValue with creator and return base MValue
+fun createMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
+{
+    // TODO: PROFILE HEAP VS STACK METHODS
+
+    // Ref<MValueBool>
+    val refmvaluetype = create()
+    // MValueBool
+    val mvaluetype = CAPI.func.alt_RefBase_RefStore_constIMValue_Get(refmvaluetype)
+    // MValue
+    val mvalue = cast(mvaluetype)
+    // Ref<MValue>
+    val refmvalue = CAPI.func.alt_RefBase_RefStore_constIMValue_Create_4_CAPI_Heap(mvalue)
+    CAPI.func.alt_IMValue_RemoveRef(mvalue)
+    return refmvalue
+}
+
+/**
+ * returns Ref<MValue>
+ * must be freed with alt_RefBase_RefStore_constIMValue_CAPI_Free
+ */
+fun createMValue(value: Any): Pointer {
+    return when (value) {
+        is Boolean -> {
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueBool_CAPI_Heap(CAPI.core, value) },
+                { CAPI.func.alt_IMValueBool_to_alt_IMValue(it) }
+            )
+        }
+        is Int -> {
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueInt_CAPI_Heap(CAPI.core, value.toLong()) },
+                { CAPI.func.alt_IMValueInt_to_alt_IMValue(it) }
+            )
+        }
+        is String -> {
+            createMValue(
+                { CAPI.func.alt_ICore_CreateMValueString_CAPI_Heap(CAPI.core, value.altString.pointer) },
+                { CAPI.func.alt_IMValueString_to_alt_IMValue(it) }
+            )
+        }
+        else -> {
+            throw TypeCastException("Unsupported arg type '${value::class}', value: '$value'")
+        }
+    }
+}
+
+fun createMValueAndFree(value: Any, f: (mvalue: Pointer) -> Unit) {
+    val mvalue = createMValue(value)
+    f(mvalue)
+    CAPI.func.alt_RefBase_RefStore_constIMValue_CAPI_Free(mvalue)
 }

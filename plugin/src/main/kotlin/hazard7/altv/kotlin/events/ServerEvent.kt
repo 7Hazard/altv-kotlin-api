@@ -3,7 +3,7 @@ package hazard7.altv.kotlin.events
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.*
 import hazard7.altv.kotlin.StringView
-import hazard7.altv.kotlin.altview
+import hazard7.altv.kotlin.altStringView
 import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import java.lang.Exception
@@ -131,7 +131,7 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
                     }
                     is String -> {
                         getBaseRefMValue(
-                            { CAPI.func.alt_ICore_CreateMValueString_CAPI_Heap(CAPI.core, arg.altstring.pointer) },
+                            { CAPI.func.alt_ICore_CreateMValueString_CAPI_Heap(CAPI.core, arg.altString.pointer) },
                             { CAPI.func.alt_IMValueString_to_alt_IMValue(it) }
                         )
                     }
@@ -147,7 +147,7 @@ class ServerEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
                 // refcount = 1
             }
 
-            CAPI.func.alt_ICore_TriggerLocalEvent(CAPI.core, name.altview.ptr(), arr.pointer)
+            CAPI.func.alt_ICore_TriggerLocalEvent(CAPI.core, name.altStringView.ptr(), arr.pointer)
             // refcounts=2
             CAPI.func.alt_Array_RefBase_RefStore_constIMValue_CAPI_Free(arr.pointer)
             // refcounts=1

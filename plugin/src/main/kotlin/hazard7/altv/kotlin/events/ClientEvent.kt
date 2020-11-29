@@ -3,17 +3,9 @@ package hazard7.altv.kotlin.events
 import hazard7.altv.jvm.CAPI
 import hazard7.altv.kotlin.*
 import hazard7.altv.kotlin.StringView
-import hazard7.altv.kotlin.altview
-import hazard7.altv.kotlin.entities.Player
 import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import java.lang.Exception
-import java.lang.reflect.MalformedParametersException
-import java.lang.reflect.Method
-import java.security.InvalidParameterException
-import kotlin.coroutines.suspendCoroutine
-import kotlin.reflect.KFunction
-import kotlin.reflect.jvm.reflect
 
 class ClientEvent internal constructor(ceventptr: Pointer) : Event(ceventptr) {
     val pointer = CAPI.func.alt_CEvent_to_alt_CClientScriptEvent(ceventptr)

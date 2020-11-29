@@ -1,11 +1,10 @@
 package hazard7.altv.kotlin.entities
 
 import hazard7.altv.jvm.CAPI
+import hazard7.altv.kotlin.*
 import hazard7.altv.kotlin.Vector3f
 import hazard7.altv.kotlin.layout
 import hazard7.altv.kotlin.math.Float3
-import hazard7.altv.kotlin.nextTick
-import hazard7.altv.kotlin.pointer
 import jnr.ffi.Pointer
 import kotlinx.coroutines.runBlocking
 
@@ -54,6 +53,20 @@ open class Entity internal constructor(pointer: Pointer)
                 ent.ptr.set(owner.playerPtr)
                 CAPI.func.alt_IEntity_SetNetworkOwner(entityPtr, ent.pointer, false)
             }
+        }
+    }
+
+    fun getSyncedMetadata(key: String) {
+        notDeleted {  }
+        return getMValue {
+            CAPI.func.alt_IEntity_GetSyncedMetaData(entityPtr, key.altStringView.ptr(), it)
+        }
+    }
+
+    fun setSyncedMetadata(key: String, value: Any) {
+        notDeleted {  }
+        createMValueAndFree(value) {
+            CAPI.func.alt_IEntity_SetSyncedMetaData(entityPtr, key.altStringView.ptr(), it)
         }
     }
 }

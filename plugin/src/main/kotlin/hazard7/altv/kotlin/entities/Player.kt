@@ -55,64 +55,20 @@ open class Player constructor(pointer: Pointer)
     {
         notDeleted {  }
 
-        val emptyMValue = CAPI.alt_RefBase_RefStore_constIMValue()
-        emptyMValue.ptr.set(0)
         val arr = CAPI.alt_Array_RefBase_RefStore_constIMValue(
             CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Create_CAPI_Heap()
         )
         CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Reserve(arr.pointer, args.size.toLong())
 
-        fun getBaseRefMValue(create: () -> Pointer, cast: (Pointer) -> Pointer): Pointer
-        {
-            // TODO: PROFILE HEAP VS STACK METHODS
-
-            // Ref<MValueBool>
-            val refmvaluetype = create()
-            // MValueBool
-            val mvaluetype = CAPI.func.alt_RefBase_RefStore_constIMValue_Get(refmvaluetype)
-            // MValue
-            val mvalue = cast(mvaluetype)
-            // Ref<MValue>
-            val refmvalue = CAPI.func.alt_RefBase_RefStore_constIMValue_Create_4_CAPI_Heap(mvalue)
-            CAPI.func.alt_IMValue_RemoveRef(mvalue)
-            return refmvalue
-        }
-
         for ((i, arg) in args.withIndex()) {
-            val refmvalue = when (arg) {
-                is Boolean -> {
-                    getBaseRefMValue(
-                        { CAPI.func.alt_ICore_CreateMValueBool_CAPI_Heap(CAPI.core, arg) },
-                        { CAPI.func.alt_IMValueBool_to_alt_IMValue(it) }
-                    )
-                }
-                is Int -> {
-                    getBaseRefMValue(
-                        { CAPI.func.alt_ICore_CreateMValueInt_CAPI_Heap(CAPI.core, arg.toLong()) },
-                        { CAPI.func.alt_IMValueInt_to_alt_IMValue(it) }
-                    )
-                }
-                is String -> {
-                    getBaseRefMValue(
-                        { CAPI.func.alt_ICore_CreateMValueString_CAPI_Heap(CAPI.core, arg.altstring.pointer) },
-                        { CAPI.func.alt_IMValueString_to_alt_IMValue(it) }
-                    )
-                }
-                else -> {
-                    throw TypeCastException("Unsupported event arg type '${arg::class.java}', value: '$arg'")
-                }
+            createMValueAndFree(arg) {
+                CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Push(arr.pointer, it)
             }
-
-            // refcount=1, ++ after push
-            CAPI.func.alt_Array_RefBase_RefStore_constIMValue_Push(arr.pointer, refmvalue)
-            // refcount=2, ok to capi free, will deref
-            CAPI.func.alt_RefBase_RefStore_constIMValue_CAPI_Free(refmvalue)
-            // refcount = 1
         }
 
         val playerRef = CAPI.alt_RefBase_RefStore_IPlayer()
         playerRef.ptr.set(playerPtr)
-        CAPI.func.alt_ICore_TriggerClientEvent(CAPI.core, playerRef.pointer, name.altview.ptr(), arr.pointer)
+        CAPI.func.alt_ICore_TriggerClientEvent(CAPI.core, playerRef.pointer, name.altStringView.ptr(), arr.pointer)
         // refcounts=2
         CAPI.func.alt_Array_RefBase_RefStore_constIMValue_CAPI_Free(arr.pointer)
         // refcounts=1
