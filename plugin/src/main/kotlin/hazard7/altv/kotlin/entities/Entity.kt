@@ -69,4 +69,18 @@ open class Entity internal constructor(pointer: Pointer)
             CAPI.func.alt_IEntity_SetSyncedMetaData(entityPtr, key.altStringView.ptr(), it)
         }
     }
+
+    fun getStreamSyncedMetadata(key: String) {
+        notDeleted {  }
+        return getMValue {
+            CAPI.func.alt_IEntity_GetStreamSyncedMetaData(entityPtr, key.altStringView.ptr(), it)
+        }
+    }
+
+    fun setStreamSyncedMetadata(key: String, value: Any) {
+        notDeleted {  }
+        createMValueAndFree(value) {
+            CAPI.func.alt_IEntity_SetStreamSyncedMetaData(entityPtr, key.altStringView.ptr(), it)
+        }
+    }
 }
