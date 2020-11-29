@@ -66,6 +66,9 @@ open class Event internal constructor(pointer: Pointer) {
                     CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_REMOVE_ENTITY_EVENT -> {
                         return@alt_ICore_SubscribeEvent_cb_Callback true
                     }
+                    CAPI.alt_CEvent_Type.ALT_CEVENT_TYPE_CREATE_BASE_OBJECT_EVENT -> {
+                        return@alt_ICore_SubscribeEvent_cb_Callback true
+                    }
 
                     else -> {
                         logWarning("[Kotlin-JVM] Internally unhandled event ${event.type.name}")
