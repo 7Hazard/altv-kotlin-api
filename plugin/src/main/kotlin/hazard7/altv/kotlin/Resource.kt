@@ -96,6 +96,13 @@ class Resource internal constructor(resourceptr: Pointer) {
         }
     }
 
+    fun getEntityByID(id: Int) : Entity? {
+        val ref = CAPI.alt_RefBase_RefStore_IEntity()
+        CAPI.func.alt_ICore_GetEntityByID(CAPI.core, id.toShort(), ref.pointer)
+        if(ref.ptr.get() == null) return null
+        else return getOrCreateEntity(ref.ptr.get())
+    }
+
     internal fun deleteObject(pointer: Pointer) {
         val obj = ptrToBaseObject[pointer] ?: return
 
