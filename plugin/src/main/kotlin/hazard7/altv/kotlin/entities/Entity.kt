@@ -15,7 +15,7 @@ open class Entity internal constructor(pointer: Pointer)
 
     fun setPos(value: Float3) = notDeleted {
         nextTick {
-            CAPI.func.alt_IEntity_SetRotation(entityPtr, value.layout().pointer)
+            CAPI.func.alt_IEntity_SetPosition(entityPtr, value.layout().pointer)
         }
     }
     var pos: Float3
